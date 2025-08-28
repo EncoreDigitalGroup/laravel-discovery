@@ -7,12 +7,6 @@
             "email": "marc.beinder@encoredigitalgroup.com"
         }
     ],
-    "repositories": [
-        {
-            "type": "composer",
-            "url": "https://packages.encoredigitalgroup.com"
-        }
-    ],
     "config": {
         "preferred-install": "dist",
         "sort-packages": true,
@@ -28,7 +22,8 @@
         "php": "^8.3",
         "encoredigitalgroup/stdlib": "^2",
         "illuminate/support": "^11|^12",
-        "phpgenesis/logger": "^0.3"
+        "phpgenesis/logger": "1.0",
+        "nikic/php-parser": "^5.4"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.9",
@@ -37,7 +32,7 @@
         "orchestra/testbench": "^10",
         "pestphp/pest": "^3",
         "pestphp/pest-plugin-laravel": "^3",
-        "phpgenesis/devutilities": "^0.3",
+        "phpgenesis/devutilities": "^1.0",
         "phpstan/extension-installer": "^1.3",
         "phpstan/phpstan": "^2",
         "rector/rector": "^2",
@@ -46,7 +41,7 @@
     },
     "autoload": {
         "psr-4": {
-            "EncoreDigitalGroup\\PackageTemplate\\": "src/"
+            "EncoreDigitalGroup\\LaravelDiscovery\\": "src/"
         }
     },
     "scripts": {},

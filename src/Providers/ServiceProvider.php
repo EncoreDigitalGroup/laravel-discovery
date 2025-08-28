@@ -1,15 +1,19 @@
 <?php
 
-namespace EncoreDigitalGroup\PackageTemplate\Providers;
+namespace EncoreDigitalGroup\LaravelDisovery\Providers;
 
+use EncoreDigitalGroup\LaravelDiscovery\Console\Commands\DiscoverInterfaceImplementationsCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . "/../../config/config.php", "template");
     }
 
-    public function boot(): void {}
+    public function boot(): void {
+        $this->commands([
+            DiscoverInterfaceImplementationsCommand::class
+        ]);
+    }
 }

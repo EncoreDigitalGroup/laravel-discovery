@@ -196,6 +196,15 @@
       <path value="$PROJECT_DIR$/vendor/psr/log" />
       <path value="$PROJECT_DIR$/vendor/psr/http-client" />
       <path value="$PROJECT_DIR$/vendor/psr/event-dispatcher" />
+      <path value="$PROJECT_DIR$/vendor/pestphp/pest-plugin-mutate" />
+      <path value="$PROJECT_DIR$/vendor/symfony/property-info" />
+      <path value="$PROJECT_DIR$/vendor/symfony/polyfill-php85" />
+      <path value="$PROJECT_DIR$/vendor/symfony/property-access" />
+      <path value="$PROJECT_DIR$/vendor/symfony/type-info" />
+      <path value="$PROJECT_DIR$/vendor/marc-mabe/php-enum" />
+      <path value="$PROJECT_DIR$/vendor/orchestra/sidekick" />
+      <path value="$PROJECT_DIR$/vendor/iamcal/sql-parser" />
+      <path value="$PROJECT_DIR$/vendor/staabm/side-effects-detector" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />

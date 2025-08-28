@@ -48,7 +48,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "EncoreDigitalGroup\\PackageTemplate\\ServiceProvider"
+                "EncoreDigitalGroup\\LaravelDiscovery\\Providers\\ServiceProvider"
             ],
             "dont-discover": []
         },

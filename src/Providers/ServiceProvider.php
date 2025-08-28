@@ -1,6 +1,6 @@
 <?php
 
-namespace EncoreDigitalGroup\LaravelDisovery\Providers;
+namespace EncoreDigitalGroup\LaravelDiscovery\Providers;
 
 use EncoreDigitalGroup\LaravelDiscovery\Console\Commands\DiscoverInterfaceImplementationsCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;

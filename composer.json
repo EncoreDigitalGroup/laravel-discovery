@@ -1,0 +1,65 @@
+{
+    "name": "encoredigitalgroup/php-package-template",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Marc Beinder",
+            "email": "marc.beinder@encoredigitalgroup.com"
+        }
+    ],
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.encoredigitalgroup.com"
+        }
+    ],
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "neronmoon/scriptsdev": true,
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true,
+            "phpstan/extension-installer": true,
+            "tbachert/spi": true
+        }
+    },
+    "require": {
+        "php": "^8.3",
+        "encoredigitalgroup/stdlib": "^2",
+        "illuminate/support": "^11|^12",
+        "phpgenesis/logger": "^0.3"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.9",
+        "larastan/larastan": "^3",
+        "neronmoon/scriptsdev": "^0.1.9",
+        "orchestra/testbench": "^10",
+        "pestphp/pest": "^3",
+        "pestphp/pest-plugin-laravel": "^3",
+        "phpgenesis/devutilities": "^0.3",
+        "phpstan/extension-installer": "^1.3",
+        "phpstan/phpstan": "^2",
+        "rector/rector": "^2",
+        "tightenco/duster": "^3.0",
+        "tomasvotruba/cognitive-complexity": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "EncoreDigitalGroup\\PackageTemplate\\": "src/"
+        }
+    },
+    "scripts": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "EncoreDigitalGroup\\PackageTemplate\\ServiceProvider"
+            ],
+            "dont-discover": []
+        },
+        "scripts-dev": {
+            "post-update-cmd": [],
+            "post-autoload-dump": []
+        }
+    }
+}

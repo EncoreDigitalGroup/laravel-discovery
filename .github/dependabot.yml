@@ -1,0 +1,17 @@
+version: 2
+registries:
+    composer:
+        type: composer-repository
+        url: https://packages.encoredigitalgroup.com
+        username: ${{secrets.ENCOREDIGITAL_PACKAGES_USERNAME}}
+        password: ${{secrets.ENCOREDIGITAL_PACKAGES_PASSWORD}}
+updates:
+    -   package-ecosystem: "composer"
+        directory: "/"
+        registries:
+            - composer
+        schedule:
+            interval: weekly
+            day: wednesday
+            time: "12:00"
+            timezone: America/Chicago

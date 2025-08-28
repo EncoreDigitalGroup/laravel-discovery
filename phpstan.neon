@@ -1,0 +1,13 @@
+parameters:
+    level: 8
+    paths:
+        - src
+    reportUnmatchedIgnoredErrors: false
+    checkDynamicProperties: false
+    checkTooWideReturnTypesInProtectedAndPublicMethods: false
+    ignoreErrors:
+        - identifier: missingType.iterableValue
+        - identifier: missingType.generics
+    cognitive_complexity:
+            class: 50
+            function: 10

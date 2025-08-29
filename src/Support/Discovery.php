@@ -31,6 +31,10 @@ class Discovery
 
     public static function cache(string $key): array
     {
+        if(class_exists($key)){
+            $key = class_basename($key);
+        }
+
         return require base_path("{$key}.php");
     }
 

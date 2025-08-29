@@ -20,7 +20,10 @@ class DiscoveryConfig {
 
     public function addInterface(string $name): self
     {
-        $this->interfaces[] = $name;
+        if(class_exists($name)){
+            $name = class_basename($name);
+            $this->interfaces[] = $name;
+        }
 
         return $this;
     }

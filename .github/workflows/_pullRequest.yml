@@ -51,14 +51,24 @@ jobs:
     StaticAnalysis:
         needs: CodeStyle
         name: StaticAnalysis
-        uses: EncoreSoftware/ci-pipelines/.github/workflows/php_staticAnalysis.yml@v2
+        uses: EncoreDigitalGroup/ci-workflows/.github/workflows/php_larastan.yml@v2
         with:
-            composerAuthJson: ${{ vars.COMPOSER_AUTH_JSON }}
-            phpVersion: '8.3'
+            phpVersion: '8.4'
             path: 'src/'
             branch: ${{ github.head_ref }}
 
+    Tests:
+        needs: CodeStyle
+        name: Tests
+        uses: EncoreDigitalGroup/ci-workflows/.github/workflows/php_pest.yml@v2
+        with:
+            phpVersion: '8.4'
+            branch: ${{ github.head_ref }}
+            enforceCoverage: true
+            minCodeCoverage: '85.5'
+            runParallel: true
+
     AutoMerge:
-        needs: [ StaticAnalysis ]
+        needs: [ StaticAnalysis, Tests ]
         name: Auto-Merge
         uses: EncoreDigitalGroup/ci-workflows/.github/workflows/github_dependabotAutoMerge.yml@v2

@@ -56,7 +56,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "EncoreDigitalGroup\\LaravelDiscovery\\Providers\\ServiceProvider"
+                "EncoreDigitalGroup\\LaravelDiscovery\\Providers\\DiscoveryServiceProvider"
             ],
             "dont-discover": []
         },

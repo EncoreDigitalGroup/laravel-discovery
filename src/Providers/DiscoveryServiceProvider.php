@@ -5,7 +5,7 @@ namespace EncoreDigitalGroup\LaravelDiscovery\Providers;
 use EncoreDigitalGroup\LaravelDiscovery\Console\Commands\DiscoverInterfaceImplementationsCommand;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
-class ServiceProvider extends BaseServiceProvider
+class DiscoveryServiceProvider extends BaseServiceProvider
 {
     public function register(): void {}
 

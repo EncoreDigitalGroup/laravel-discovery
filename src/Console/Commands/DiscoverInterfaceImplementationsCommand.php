@@ -86,9 +86,13 @@ class DiscoverInterfaceImplementationsCommand extends Command
             $directories[] = base_path("app-modules");
         }
 
-        if (Discovery::config()->vendors == []) {
+        if (Discovery::config()->shouldSearchAllVendors()) {
+            Discovery::config()->searchVendors(false);
             $directories[] = base_path("vendor");
-        } else {
+            return $directories;
+        }
+
+        if (Discovery::config()->shouldSearchVendors()) {
             foreach (Discovery::config()->vendors as $vendor) {
                 $directories[] = base_path("vendor/{$vendor}");
             }
@@ -116,7 +120,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
                     }
 
                     $this->traverser->traverse($ast);
-                } catch (Error $e) {
+                } catch (Error) {
                     // Skip files with parsing errors
                 }
             }

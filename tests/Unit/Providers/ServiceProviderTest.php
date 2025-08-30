@@ -1,10 +1,10 @@
 <?php
 
-use EncoreDigitalGroup\LaravelDiscovery\Providers\ServiceProvider;
+use EncoreDigitalGroup\LaravelDiscovery\Providers\DiscoveryServiceProvider;
 
 beforeEach(function (): void {
     $this->app = app();
-    $this->serviceProvider = new ServiceProvider($this->app);
+    $this->serviceProvider = new DiscoveryServiceProvider($this->app);
 });
 
 describe("ServiceProvider Tests", function (): void {
@@ -30,9 +30,9 @@ describe("ServiceProvider Tests", function (): void {
     });
 
     test("service provider can be instantiated", function (): void {
-        $provider = new ServiceProvider($this->app);
+        $provider = new DiscoveryServiceProvider($this->app);
 
-        expect($provider)->toBeInstanceOf(ServiceProvider::class);
+        expect($provider)->toBeInstanceOf(DiscoveryServiceProvider::class);
     });
 
     test("commands are registered in boot method", function (): void {

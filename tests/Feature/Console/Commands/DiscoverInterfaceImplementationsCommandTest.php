@@ -3,6 +3,7 @@
 use EncoreDigitalGroup\LaravelDiscovery\Console\Commands\DiscoverInterfaceImplementationsCommand;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 use Illuminate\Support\Facades\Artisan;
+use Tests\TestHelpers\TestInterface;
 
 describe("DiscoveryCommand Tests", function (): void {
     test("command runs successfully with no interfaces configured", function (): void {
@@ -15,7 +16,8 @@ describe("DiscoveryCommand Tests", function (): void {
     test("command runs discovery for configured interfaces", function (): void {
         // Since interface_exists() returns true for test interfaces,
         // interfaces will be added and command will run successfully
-        Discovery::config()->addInterface(\Tests\TestHelpers\TestInterface::class);
+        Discovery::config()
+            ->addInterface(TestInterface::class);
 
         $this->artisan("discovery:run")
             ->assertExitCode(0);
@@ -23,7 +25,8 @@ describe("DiscoveryCommand Tests", function (): void {
 
     test("command creates cache files for interfaces", function (): void {
         // Since interface_exists() returns true, interfaces will be added
-        Discovery::config()->addInterface(\Tests\TestHelpers\TestInterface::class);
+        Discovery::config()
+            ->addInterface(TestInterface::class);
 
         $this->artisan("discovery:run");
 
@@ -33,7 +36,7 @@ describe("DiscoveryCommand Tests", function (): void {
 
     test("command handles multiple interfaces", function (): void {
         Discovery::config()
-            ->addInterface(\Tests\TestHelpers\TestInterface::class)
+            ->addInterface(TestInterface::class)
             ->addInterface(\Tests\TestHelpers\AnotherTestInterface::class);
 
         // Since interfaces get added, command runs successfully with processing
@@ -43,7 +46,7 @@ describe("DiscoveryCommand Tests", function (): void {
 
     test("command creates cache directory if not exists", function (): void {
         // Since interface_exists() returns true, interfaces will be added
-        Discovery::config()->addInterface(\Tests\TestHelpers\TestInterface::class);
+        Discovery::config()->addInterface(TestInterface::class);
 
         $this->artisan("discovery:run");
 
@@ -63,7 +66,7 @@ describe("DiscoveryCommand Tests", function (): void {
 
     test("command scans configured vendor directories", function (): void {
         Discovery::config()
-            ->addInterface(\Tests\TestHelpers\TestInterface::class)
+            ->addInterface(TestInterface::class)
             ->addVendor("specific-vendor");
 
         // The command should run without errors, interface added so processing occurs

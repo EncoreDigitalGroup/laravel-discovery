@@ -89,6 +89,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
         if (Discovery::config()->shouldSearchAllVendors()) {
             Discovery::config()->searchVendors(false);
             $directories[] = base_path("vendor");
+
             return $directories;
         }
 

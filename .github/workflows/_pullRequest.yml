@@ -42,11 +42,10 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             -   name: CodeStyle
-                uses: EncoreSoftware/ci-pipelines/actions/php/codeStyle@v2
+                uses: EncoreDigitalGroup/ci-workflows/actions/php/codeStyle@v2
                 with:
                     branch: "${{ github.head_ref }}"
                     repository: "${{ github.repository }}"
-                    composerAuthJson: "${{ vars.COMPOSER_AUTH_JSON }}"
 
     StaticAnalysis:
         needs: CodeStyle
@@ -65,7 +64,7 @@ jobs:
             phpVersion: '8.4'
             branch: ${{ github.head_ref }}
             enforceCoverage: true
-            minCodeCoverage: '85.5'
+            minCodeCoverage: 85.5
             runParallel: true
 
     AutoMerge:

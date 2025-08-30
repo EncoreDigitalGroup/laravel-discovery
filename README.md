@@ -34,11 +34,10 @@ Discovery::config()->addInterface(YourInterface::class);
 
 // Add specific vendors to search
 Discovery::config()
-    ->searchVendors()
-    ->addVendor('laravel')
-    ->addVendor('spatie');
+    ->addVendor("laravel")
+    ->addVendor("spatie");
 
-// Or search all vendors (use with caution)
+// Or search all vendors (extremely slow, use with caution)
 Discovery::config()->searchAllVendors();
 ```
 
@@ -64,8 +63,6 @@ Access the discovered implementations using the cache method:
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 
 // Get all implementations of an interface
-$implementations = Discovery::cache('YourInterface');
-// or
 $implementations = Discovery::cache(YourInterface::class);
 ```
 
@@ -78,18 +75,6 @@ The package searches in the following directories by default:
 - `app/` - Your application code
 - `app_modules/` or `app-modules/` - If they exist
 - Configured vendor directories (when enabled)
-
-### Vendor Searching
-
-```php
-// Enable vendor searching for specific vendors
-Discovery::config()
-    ->searchVendors()
-    ->addVendor('vendor-name');
-
-// Search all vendors (performance impact)
-Discovery::config()->searchAllVendors();
-```
 
 ### Cache Location
 

@@ -1,6 +1,7 @@
 {
     "name": "encoredigitalgroup/php-package-template",
     "type": "library",
+    "license": "BSD-3-Clause",
     "authors": [
         {
             "name": "Marc Beinder",

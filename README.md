@@ -1,14 +1,14 @@
 # Laravel Discovery
 
-A Laravel package that provides automatic discovery of interface implementations throughout your codebase and vendor packages.
+A Laravel package that automatically discovers and caches interface implementations across your codebase and vendor packages.
 
 ## Features
 
-- **Automatic Interface Discovery**: Scans your codebase to find all classes implementing specified interfaces
-- **Vendor Package Support**: Optionally includes vendor packages in the discovery process
-- **Caching**: Generates cached lists for improved performance
-- **Artisan Command**: Simple command-line interface for running discovery
-- **Configurable**: Customize which interfaces to discover and which vendor packages to include
+- **Interface Implementation Discovery**: Automatically finds all classes that implement specific interfaces
+- **Caching**: Generates cached files for fast runtime lookups
+- **Vendor Support**: Can search through vendor packages for implementations
+- **Configurable**: Flexible configuration for search paths and interfaces
+- **Artisan Command**: Simple command to trigger discovery process
 
 ## Installation
 
@@ -22,54 +22,150 @@ The service provider will be automatically registered via Laravel's package auto
 
 ## Usage
 
-### Basic Discovery
+### Basic Configuration
 
-Run the discovery command to scan for interface implementations. This should typically be run during composer's post-autoload-dump phase.
-
-```bash
-php artisan discovery:run
-```
-
-### Configuration
-
-Configure which interfaces to discover by using the Discovery facade:
+Configure the discovery system using the `Discovery` facade:
 
 ```php
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 
 // Add interfaces to discover
-Discovery::config()
-    ->addInterface("YourInterface")
-    ->addInterface("AnotherInterface");
+Discovery::config()->addInterface(YourInterface::class);
 
-// Optionally add specific vendor packages to scan
-Discovery::config()->addVendor("vendor-name");
+// Add specific vendors to search
+Discovery::config()
+    ->searchVendors()
+    ->addVendor('laravel')
+    ->addVendor('spatie');
+
+// Or search all vendors (use with caution)
+Discovery::config()->searchAllVendors();
 ```
 
-### Accessing Discovered Classes
+### Running Discovery
 
-Retrieved cached discovery results:
+Execute the discovery process using the Artisan command:
+
+```bash
+php artisan discovery:run
+```
+
+This command will:
+
+1. Search for all configured interfaces
+2. Find implementing classes in your app, modules, and configured vendor paths
+3. Generate cache files in `bootstrap/cache/discovery/`
+
+### Retrieving Cached Results
+
+Access the discovered implementations using the cache method:
 
 ```php
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 
-// Get all classes implementing a specific interface
-$implementations = Discovery::cache("YourInterface");
+// Get all implementations of an interface
+$implementations = Discovery::cache('YourInterface');
+// or
+$implementations = Discovery::cache(YourInterface::class);
+```
+
+## Configuration Options
+
+### Search Paths
+
+The package searches in the following directories by default:
+
+- `app/` - Your application code
+- `app_modules/` or `app-modules/` - If they exist
+- Configured vendor directories (when enabled)
+
+### Vendor Searching
+
+```php
+// Enable vendor searching for specific vendors
+Discovery::config()
+    ->searchVendors()
+    ->addVendor('vendor-name');
+
+// Search all vendors (performance impact)
+Discovery::config()->searchAllVendors();
+```
+
+### Cache Location
+
+Cache files are stored in `bootstrap/cache/discovery/` by default. Each interface gets its own cache file named after the interface (e.g., `YourInterface.php`).
+
+## Example
+
+```php
+<?php
+
+// Define an interface
+interface PaymentGatewayInterface
+{
+    public function process(float $amount): bool;
+}
+
+// Implement the interface
+class StripeGateway implements PaymentGatewayInterface
+{
+    public function process(float $amount): bool
+    {
+        // Implementation
+    }
+}
+
+class PayPalGateway implements PaymentGatewayInterface
+{
+    public function process(float $amount): bool
+    {
+        // Implementation
+    }
+}
+
+// Configure discovery
+Discovery::config()->addInterface(PaymentGatewayInterface::class);
+
+// Run discovery
+// php artisan discovery:run
+
+// Use the cached results
+$gateways = Discovery::cache(PaymentGatewayInterface::class);
+// Returns: ['App\\StripeGateway', 'App\\PayPalGateway']
 ```
 
 ## How It Works
 
 1. **Scanning**: The package uses PHP-Parser to analyze PHP files and identify classes that implement specified interfaces
 2. **Directory Traversal**: Scans the following directories:
-   - `app/` - Your application code
-   - `app_modules/` or `app-modules/` - Modular application code (if present)
-   - `vendor/` - By default, the entire vendor directory is scanned. If you use the `addVendor()` method in the configuration, then only the vendor
-                 directories specified will be scanned.
-3. **Caching**: Generates PHP cache files in `bootstrap/cache/discovery/` for each interface (this is configurable)
+    - `app/` - Your application code
+    - `app_modules/` or `app-modules/` - Modular application code (if present)
+    - Vendor directories (when configured)
+3. **Caching**: Generates PHP cache files in `bootstrap/cache/discovery/` for each interface
 4. **Performance**: Cached results provide fast access to implementation lists
 
 ## Requirements
 
-- PHP ^8.3
-- Laravel ^11|^12
-- nikic/php-parser ^5.4
+- PHP 8.3 or higher
+- Laravel 11 or 12
+
+## Dependencies
+
+- `nikic/php-parser` - For parsing PHP files and finding interface implementations
+- `encoredigitalgroup/stdlib` - Internal utilities
+
+## Testing
+
+Run the test suite:
+
+```bash
+composer test
+```
+
+## License
+
+This repository is licensed under a [modified BSD-3-Clause License](https://docs.encoredigitalgroup.com/LicenseTerms).
+
+## Contributing
+
+Contributions are governed by the Encore Digital Group [Contribution Terms](https://docs.encoredigitalgroup.com/Contributing/Terms).

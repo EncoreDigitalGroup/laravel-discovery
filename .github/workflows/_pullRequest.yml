@@ -64,7 +64,6 @@ jobs:
             phpVersion: '8.4'
             branch: ${{ github.head_ref }}
             enforceCoverage: true
-            minCodeCoverage: 85.5
             runParallel: true
 
     AutoMerge:

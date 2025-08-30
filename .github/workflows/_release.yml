@@ -9,7 +9,7 @@ on:
 jobs:
     CreateRelease:
         name: Create Release
-        uses: EncoreSoftware/ci-pipelines/.github/workflows/github_createRelease.yml@v2
+        uses: EncoreDigitalGroup/ci-workflows/.github/workflows/github_createRelease.yml@v2
         permissions:
             contents: write
         with:

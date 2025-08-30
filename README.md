@@ -20,6 +20,12 @@ composer require encoredigitalgroup/laravel-discovery
 
 The service provider will be automatically registered via Laravel's package auto-discovery.
 
+Add the following to your `post-autoload-dump` script:
+
+```bash
+@php artisan discovery:run
+```
+
 ## Usage
 
 ### Basic Configuration

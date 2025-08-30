@@ -7,13 +7,12 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class ServiceProvider extends BaseServiceProvider
 {
-    public function register(): void
-    {
-    }
+    public function register(): void {}
 
-    public function boot(): void {
+    public function boot(): void
+    {
         $this->commands([
-            DiscoverInterfaceImplementationsCommand::class
+            DiscoverInterfaceImplementationsCommand::class,
         ]);
     }
 }

@@ -205,6 +205,7 @@
       <path value="$PROJECT_DIR$/vendor/orchestra/sidekick" />
       <path value="$PROJECT_DIR$/vendor/iamcal/sql-parser" />
       <path value="$PROJECT_DIR$/vendor/staabm/side-effects-detector" />
+      <path value="$PROJECT_DIR$/vendor/pestphp/pest-plugin-drift" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.3" />

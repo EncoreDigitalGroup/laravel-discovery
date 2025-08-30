@@ -86,7 +86,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
             $directories[] = base_path("app-modules");
         }
 
-        if(Discovery::config()->vendors == []) {
+        if (Discovery::config()->vendors == []) {
             $directories[] = base_path("vendor");
         } else {
             foreach (Discovery::config()->vendors as $vendor) {

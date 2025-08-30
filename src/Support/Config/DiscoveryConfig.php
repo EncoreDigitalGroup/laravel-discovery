@@ -2,12 +2,14 @@
 
 namespace EncoreDigitalGroup\LaravelDiscovery\Support\Config;
 
-class DiscoveryConfig {
+class DiscoveryConfig
+{
     public string $cachePath;
     public array $vendors = [];
     public array $interfaces = [];
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->cachePath = base_path("boostrap/cache/discovery");
     }
 
@@ -20,7 +22,7 @@ class DiscoveryConfig {
 
     public function addInterface(string $name): self
     {
-        if(class_exists($name)){
+        if (interface_exists($name)) {
             $name = class_basename($name);
             $this->interfaces[] = $name;
         }

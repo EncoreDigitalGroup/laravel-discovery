@@ -1,104 +1,110 @@
 <?php
 
-namespace Tests\Unit\Support\Config;
-
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
-use PHPUnit\Framework\TestCase;
+use Tests\TestHelpers\AnotherTestInterface;
+use Tests\TestHelpers\TestInterface;
 
-class DiscoveryConfigTest extends TestCase
-{
-    private DiscoveryConfig $config;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        
-        // Mock base_path function if it doesn't exist
-        if (!function_exists('base_path')) {
-            function base_path($path = '') {
-                return '/mock/base/path' . ($path ? '/' . ltrim($path, '/') : '');
-            }
+beforeEach(function (): void {
+    // Mock base_path function if it doesn't exist
+    if (!function_exists("base_path")) {
+        function base_path($path = ""): string
+        {
+            return "/mock/base/path" . ($path ? "/" . ltrim($path, "/") : "");
         }
-        
-        $this->config = new DiscoveryConfig();
     }
 
-    public function test_constructor_sets_default_cache_path(): void
-    {
+    $this->config = new DiscoveryConfig;
+});
+
+describe("Discovery Config Tests", function (): void {
+    test("constructor sets default cache path", function (): void {
         $expectedPath = base_path("boostrap/cache/discovery");
-        
-        $this->assertEquals($expectedPath, $this->config->cachePath);
-    }
 
-    public function test_constructor_initializes_empty_vendors_array(): void
-    {
-        $this->assertEquals([], $this->config->vendors);
-    }
+        expect($this->config->cachePath)->toEqual($expectedPath);
+    });
 
-    public function test_constructor_initializes_empty_interfaces_array(): void
-    {
-        $this->assertEquals([], $this->config->interfaces);
-    }
+    test("constructor initializes empty vendors array", function (): void {
+        expect($this->config->vendors)->toEqual([]);
+    });
 
-    public function test_add_vendor_adds_vendor_to_array(): void
-    {
-        $vendor = 'test-vendor';
-        
+    test("constructor initializes empty interfaces array", function (): void {
+        expect($this->config->interfaces)->toEqual([]);
+    });
+
+    test("add vendor adds vendor to array", function (): void {
+        $vendor = "test-vendor";
+
         $result = $this->config->addVendor($vendor);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertContains($vendor, $this->config->vendors);
-    }
 
-    public function test_add_vendor_supports_method_chaining(): void
-    {
-        $result = $this->config->addVendor('vendor1')->addVendor('vendor2');
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals(['vendor1', 'vendor2'], $this->config->vendors);
-    }
+        expect($result)->toBe($this->config)
+            ->and($this->config->vendors)->toContain($vendor);
+    });
 
-    public function test_add_interface_adds_interface_to_array(): void
-    {
-        $interface = 'TestInterface';
-        
+    test("add vendor supports method chaining", function (): void {
+        $result = $this->config->addVendor("vendor1")->addVendor("vendor2");
+
+        expect($result)->toBe($this->config)
+            ->and($this->config->vendors)->toEqual(["vendor1", "vendor2"]);
+    });
+
+    test("add interface adds interface to array", function (): void {
+        $interface = TestInterface::class;
+
         $result = $this->config->addInterface($interface);
-        
-        $this->assertSame($this->config, $result);
-        $this->assertContains($interface, $this->config->interfaces);
-    }
 
-    public function test_add_interface_supports_method_chaining(): void
-    {
-        $result = $this->config->addInterface('Interface1')->addInterface('Interface2');
-        
-        $this->assertSame($this->config, $result);
-        $this->assertEquals(['Interface1', 'Interface2'], $this->config->interfaces);
-    }
+        expect($result)->toBe($this->config);
+        // Since interface_exists() returns true for test interfaces,
+        // the basename gets added to the interfaces array
+        expect($this->config->interfaces)->toContain("TestInterface");
+    });
 
-    public function test_can_add_multiple_vendors_and_interfaces(): void
-    {
+    test("add interface supports method chaining", function (): void {
+        $result = $this->config->addInterface(TestInterface::class)->addInterface(AnotherTestInterface::class);
+
+        expect($result)->toBe($this->config);
+        // Since interface_exists() returns true for test interfaces, basenames get added
+        expect($this->config->interfaces)->toEqual(["TestInterface", "AnotherTestInterface"]);
+    });
+
+    test("can add multiple vendors and interfaces", function (): void {
         $this->config
-            ->addVendor('vendor1')
-            ->addVendor('vendor2')
-            ->addInterface('Interface1')
-            ->addInterface('Interface2');
-        
-        $this->assertEquals(['vendor1', 'vendor2'], $this->config->vendors);
-        $this->assertEquals(['Interface1', 'Interface2'], $this->config->interfaces);
-    }
+            ->addVendor("vendor1")
+            ->addVendor("vendor2")
+            ->addInterface(TestInterface::class)
+            ->addInterface(AnotherTestInterface::class);
 
-    public function test_can_add_duplicate_vendors(): void
-    {
-        $this->config->addVendor('vendor1')->addVendor('vendor1');
-        
-        $this->assertEquals(['vendor1', 'vendor1'], $this->config->vendors);
-    }
+        expect($this->config->vendors)->toEqual(["vendor1", "vendor2"]);
+        // Since interface_exists() returns true for test interfaces, basenames get added
+        expect($this->config->interfaces)->toEqual(["TestInterface", "AnotherTestInterface"]);
+    });
 
-    public function test_can_add_duplicate_interfaces(): void
-    {
-        $this->config->addInterface('Interface1')->addInterface('Interface1');
-        
-        $this->assertEquals(['Interface1', 'Interface1'], $this->config->interfaces);
-    }
-}
+    test("can add duplicate vendors", function (): void {
+        $this->config->addVendor("vendor1")->addVendor("vendor1");
+
+        expect($this->config->vendors)->toEqual(["vendor1", "vendor1"]);
+    });
+
+    test("can add duplicate interfaces", function (): void {
+        $this->config->addInterface(TestInterface::class)->addInterface(TestInterface::class);
+
+        // Since interface_exists() returns true, basenames get added (including duplicates)
+        expect($this->config->interfaces)->toEqual(["TestInterface", "TestInterface"]);
+    });
+
+    test("add interface ignores non-existent interfaces", function (): void {
+        $this->config->addInterface("NonExistentInterface");
+
+        // Since interface_exists() returns false for non-existent interfaces, nothing gets added
+        expect($this->config->interfaces)->toBeEmpty();
+    });
+
+    test("add interface only adds existing interfaces", function (): void {
+        $this->config
+            ->addInterface(TestInterface::class)
+            ->addInterface("NonExistentInterface")
+            ->addInterface(AnotherTestInterface::class);
+
+        // Only existing interfaces get added
+        expect($this->config->interfaces)->toEqual(["TestInterface", "AnotherTestInterface"]);
+    });
+});

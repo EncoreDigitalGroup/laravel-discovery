@@ -2,7 +2,7 @@
 
 namespace Tests\TestHelpers;
 
-class MultipleInterfaceImplementation implements TestInterface, AnotherTestInterface
+class MultipleInterfaceImplementation implements AnotherTestInterface, TestInterface
 {
     public function testMethod(): void
     {
@@ -11,6 +11,6 @@ class MultipleInterfaceImplementation implements TestInterface, AnotherTestInter
 
     public function anotherMethod(): string
     {
-        return 'test';
+        return "test";
     }
 }

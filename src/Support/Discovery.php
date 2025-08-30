@@ -14,10 +14,14 @@ class Discovery
     private static self $instance;
     private DiscoveryConfig $config;
 
+    public function __construct()
+    {
+        $this->config = new DiscoveryConfig;
+    }
 
     public static function make(): self
     {
-        if(!isset(self::$instance)) {
+        if (!isset(self::$instance)) {
             self::$instance = new self;
         }
 
@@ -31,14 +35,10 @@ class Discovery
 
     public static function cache(string $key): array
     {
-        if(class_exists($key)){
+        if (class_exists($key)) {
             $key = class_basename($key);
         }
 
         return require base_path("{$key}.php");
-    }
-
-    public function __construct() {
-        $this->config = new DiscoveryConfig;
     }
 }

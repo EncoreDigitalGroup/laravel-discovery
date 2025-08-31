@@ -14,6 +14,11 @@ beforeEach(function (): void {
             return "/mock/base/path" . ($path ? "/" . ltrim($path, "/") : "");
         }
     }
+
+    $vendorDir = base_path("/vendor/laravel");
+    if (!is_dir($vendorDir)) {
+        mkdir($vendorDir, 0755, true);
+    }
 });
 
 describe("DiscoveryConfig", function (): void {

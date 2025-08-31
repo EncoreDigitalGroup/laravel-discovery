@@ -16,13 +16,6 @@ use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 uses(Tests\TestCase::class)
     ->in("Feature", "Unit");
 
-beforeAll(function (): void {
-    $vendorDir = base_path("/vendor/laravel");
-    if (!is_dir($vendorDir)) {
-        mkdir($vendorDir, 0755, true);
-    }
-});
-
 beforeEach(function (): void {
     createCacheDirectory();
 });

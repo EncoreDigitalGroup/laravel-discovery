@@ -18,7 +18,7 @@ beforeEach(function (): void {
 
 describe("Discovery Config Tests", function (): void {
     test("constructor sets default cache path", function (): void {
-        $expectedPath = base_path("boostrap/cache/discovery");
+        $expectedPath = base_path("bootstrap/cache/discovery");
 
         expect($this->config->cachePath)->toEqual($expectedPath);
     });

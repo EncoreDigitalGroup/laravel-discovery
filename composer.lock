@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b7ebf60dbde5af9c51ee1432633a2e9",
+    "content-hash": "55fc7a8e35c64f514f326f35ddb00b6e",
     "packages": [
         {
             "name": "brick/math",
@@ -3275,7 +3275,7 @@
         },
         {
             "name": "phpgenesis/common",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPGenesis/Common.git",
@@ -3314,13 +3314,13 @@
             ],
             "description": "Shared Functionality for PHPGenesis",
             "support": {
-                "source": "https://github.com/PHPGenesis/Common/tree/v1.0.0"
+                "source": "https://github.com/PHPGenesis/Common/tree/v1.1.0"
             },
             "time": "2025-08-10T00:50:20+00:00"
         },
         {
             "name": "phpgenesis/logger",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPGenesis/Logger.git",
@@ -3350,7 +3350,7 @@
             ],
             "description": "Logger for PHPGenesis",
             "support": {
-                "source": "https://github.com/PHPGenesis/Logger/tree/v1.0.0"
+                "source": "https://github.com/PHPGenesis/Logger/tree/v1.1.0"
             },
             "time": "2025-08-10T00:50:20+00:00"
         },
@@ -10026,7 +10026,7 @@
         },
         {
             "name": "phpgenesis/devutilities",
-            "version": "v1.0.0",
+            "version": "v1.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPGenesis/DevUtilities.git",
@@ -10059,7 +10059,7 @@
                 "dev"
             ],
             "support": {
-                "source": "https://github.com/PHPGenesis/DevUtilities/tree/v1.0.0"
+                "source": "https://github.com/PHPGenesis/DevUtilities/tree/v1.1.0"
             },
             "time": "2025-08-10T00:50:19+00:00"
         },

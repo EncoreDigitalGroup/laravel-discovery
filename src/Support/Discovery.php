@@ -8,6 +8,8 @@
 namespace EncoreDigitalGroup\LaravelDiscovery\Support;
 
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
+use Illuminate\Support\Facades\App;
+use RuntimeException;
 
 class Discovery
 {
@@ -40,5 +42,17 @@ class Discovery
         }
 
         return require base_path("{$key}.php");
+    }
+
+    /** @internal */
+    public static function refresh(): DiscoveryConfig
+    {
+        if (!App::environment(["testing"])) {
+            throw new RuntimeException("Discovery::refresh() can only be used in testing environments.");
+        }
+
+        self::$instance = new self;
+
+        return self::make()->config;
     }
 }

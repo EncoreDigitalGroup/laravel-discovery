@@ -3,12 +3,10 @@
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 
-beforeEach(function (): void {
-    // Note: Cannot reset singleton instance as it's typed as 'self', not nullable
-    // Tests will work with the singleton pattern as intended
-});
+// Note: Cannot reset singleton instance as it's typed as 'self', not nullable
+// Tests will work with the singleton pattern as intended
 
-describe("Discovery Tests", function (): void {
+describe("Discovery", function (): void {
     test("make returns singleton instance", function (): void {
         $discovery1 = Discovery::make();
         $discovery2 = Discovery::make();

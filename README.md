@@ -10,6 +10,11 @@ A Laravel package that automatically discovers and caches interface implementati
 - **Configurable**: Flexible configuration for search paths and interfaces
 - **Artisan Command**: Simple command to trigger discovery process
 
+## Requirements
+
+- PHP 8.3+
+- Laravel 11+
+
 ## Installation
 
 Install the package via Composer:
@@ -26,11 +31,17 @@ Add the following to your `post-autoload-dump` script:
 @php artisan discovery:run
 ```
 
+This command will:
+
+1. Search for all configured interfaces
+2. Find implementing classes in your app, modules, and configured vendor paths
+3. Generate cache files in `bootstrap/cache/discovery/`
+
 ## Usage
 
 ### Basic Configuration
 
-Configure the discovery system using the `Discovery` facade:
+Configure the discovery system using the `Discovery` configuration class:
 
 ```php
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
@@ -46,20 +57,6 @@ Discovery::config()
 // Or search all vendors (extremely slow, use with caution)
 Discovery::config()->searchAllVendors();
 ```
-
-### Running Discovery
-
-Execute the discovery process using the Artisan command:
-
-```bash
-php artisan discovery:run
-```
-
-This command will:
-
-1. Search for all configured interfaces
-2. Find implementing classes in your app, modules, and configured vendor paths
-3. Generate cache files in `bootstrap/cache/discovery/`
 
 ### Retrieving Cached Results
 
@@ -133,17 +130,15 @@ $gateways = Discovery::cache(PaymentGatewayInterface::class);
     - `app_modules/` or `app-modules/` - Modular application code (if present)
     - Vendor directories (when configured)
 3. **Caching**: Generates PHP cache files in `bootstrap/cache/discovery/` for each interface
-4. **Performance**: Cached results provide fast access to implementation lists
 
-## Requirements
+Vendors and Interfaces are scanned/searched only once during Discovery
 
-- PHP 8.3 or higher
-- Laravel 11 or 12
+For example:
 
-## Dependencies
-
-- `nikic/php-parser` - For parsing PHP files and finding interface implementations
-- `encoredigitalgroup/stdlib` - Internal utilities
+- `Package A` configures Discovery to search for `Interface 1`.
+- `Package B` also configures Discovery to search for `Interface 1`.
+- `Interface 1` will only be searched for once.
+- `Interface 1` will be searched for in all locations configured by all packages.
 
 ## Testing
 

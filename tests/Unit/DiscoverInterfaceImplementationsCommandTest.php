@@ -23,15 +23,6 @@ afterEach(function (): void {
 });
 
 describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void {
-    //    test("handle method processes configured interfaces", function (): void {
-    //        Discovery::config()->addInterface(TestInterface::class);
-    //
-    //         Test that handle method exists and is callable
-    //        $command = new DiscoverInterfaceImplementationsCommand;
-    //        expect(method_exists($command, 'handle'))->toBeTrue()
-    //            ->and(Discovery::config()->interfaces)->toContain('TestInterface');
-    //    });
-
     test("discover method throws exception for empty interface name", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
@@ -131,7 +122,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     });
 
     test("directories method includes specific vendors when configured", function (): void {
-        Discovery::config()->addVendor("test-vendor");
+        Discovery::config()->addVendor("encoredigitalgroup");
 
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
@@ -140,7 +131,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
 
         $directories = $directoriesMethod->invoke($command);
 
-        expect($directories)->toContain(base_path("vendor/test-vendor"));
+        expect($directories)->toContain(base_path("vendor/encoredigitalgroup"));
 
         // Reset to prevent issues in other tests
         Discovery::config()->searchVendors(false);

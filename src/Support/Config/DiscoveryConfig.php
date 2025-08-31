@@ -2,6 +2,9 @@
 
 namespace EncoreDigitalGroup\LaravelDiscovery\Support\Config;
 
+use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
+use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
+
 class DiscoveryConfig
 {
     public string $cachePath;
@@ -18,7 +21,17 @@ class DiscoveryConfig
     public function addVendor(string $vendor): self
     {
         $this->searchVendors();
-        $this->vendors[] = $vendor;
+
+        $vendor = Str::lower($vendor);
+        $vendorPath = base_path("vendor/{$vendor}");
+
+        if (!is_dir($vendorPath)) {
+            throw new DirectoryNotFoundException($vendorPath);
+        }
+
+        if (!in_array($vendor, $this->vendors)) {
+            $this->vendors[] = $vendor;
+        }
 
         return $this;
     }
@@ -51,7 +64,10 @@ class DiscoveryConfig
     {
         if (interface_exists($name)) {
             $name = class_basename($name);
-            $this->interfaces[] = $name;
+            
+            if (!in_array($name, $this->interfaces)) {
+                $this->interfaces[] = $name;
+            }
         }
 
         return $this;

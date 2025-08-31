@@ -50,10 +50,10 @@ describe("DiscoverInterfaceImplementationsCommand Integration Tests", function (
         // Just test the configuration is set up correctly, not the actual search
         Discovery::config()
             ->addInterface(TestInterface::class)
-            ->addVendor("test-vendor");
+            ->addVendor("encoredigitalgroup");
 
         expect(Discovery::config()->shouldSearchVendors())->toBeTrue()
-            ->and(Discovery::config()->vendors)->toContain("test-vendor");
+            ->and(Discovery::config()->vendors)->toContain("encoredigitalgroup");
 
         // Reset to avoid timeout on actual vendor search
         Discovery::config()->searchVendors(false);

@@ -41,10 +41,10 @@ describe("Discovery Config Tests", function (): void {
     });
 
     test("addVendor enables vendor search and adds vendor", function (): void {
-        $result = $this->config->addVendor("test-vendor");
+        $result = $this->config->addVendor("encoredigitalgroup");
 
         expect($result)->toBe($this->config)
-            ->and($this->config->vendors)->toContain("test-vendor")
+            ->and($this->config->vendors)->toContain("encoredigitalgroup")
             ->and($this->config->shouldSearchVendors())->toBeTrue();
     });
 
@@ -72,13 +72,13 @@ describe("Discovery Config Tests", function (): void {
 
     test("method chaining works with vendor methods", function (): void {
         $result = $this->config
-            ->addVendor("vendor1")
+            ->addVendor("encoredigitalgroup")
             ->searchVendors()
             ->searchAllVendors()
-            ->addVendor("vendor2");
+            ->addVendor("laravel");
 
         expect($result)->toBe($this->config)
-            ->and($this->config->vendors)->toEqual(["vendor1", "vendor2"])
+            ->and($this->config->vendors)->toEqual(["encoredigitalgroup", "laravel"])
             ->and($this->config->shouldSearchVendors())->toBeTrue()
             ->and($this->config->shouldSearchAllVendors())->toBeTrue();
     });

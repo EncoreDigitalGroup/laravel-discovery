@@ -43,21 +43,28 @@ describe("DiscoveryCommand Tests", function (): void {
 
     test("vendor added to vendors array", function (): void {
         Discovery::config()
-            ->addVendor("specific-vendor");
+            ->addVendor("encoredigitalgroup");
 
         expect(Discovery::config()->vendors)
-            ->toContain("specific-vendor");
+            ->toContain("encoredigitalgroup");
 
         $this->artisan("discovery:run")
             ->assertExitCode(0);
     });
 
-    test("allows duplicate vendors and interfaces", function (): void {
-        $this->config->addVendor("vendor1")->addVendor("vendor1");
-        expect($this->config->vendors)->toEqual(["vendor1", "vendor1"]);
+    test("prevents duplicate vendors and interfaces", function (): void {
+        Discovery::config()
+            ->addVendor("encoredigitalgroup")
+            ->addVendor("encoredigitalgroup");
 
-        $this->config->addInterface(TestInterface::class)->addInterface(TestInterface::class);
-        expect($this->config->interfaces)->toEqual(["TestInterface", "TestInterface"]);
+        expect(Discovery::config()->vendors)->toEqual(["encoredigitalgroup"]);
+
+        Discovery::config()
+            ->addInterface(TestInterface::class)
+            ->addInterface(TestInterface::class);
+
+        expect(Discovery::config()->interfaces)
+            ->toEqual(["TestInterface"]);
     });
 
     test("command has correct configuration", function (): void {

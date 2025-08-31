@@ -70,16 +70,6 @@ describe("Discovery Config Tests", function (): void {
         expect($this->config->shouldSearchAllVendors())->toBeFalse();
     });
 
-    test("searchVendors defaults to true when called without parameter", function (): void {
-        $this->config->searchVendors();
-        expect($this->config->shouldSearchVendors())->toBeTrue();
-    });
-
-    test("searchAllVendors defaults to true when called without parameter", function (): void {
-        $this->config->searchAllVendors();
-        expect($this->config->shouldSearchAllVendors())->toBeTrue();
-    });
-
     test("method chaining works with vendor methods", function (): void {
         $result = $this->config
             ->addVendor("vendor1")

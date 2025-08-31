@@ -42,7 +42,7 @@ describe("DiscoveryConfig", function (): void {
     });
 
     test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn() => $this->config->addVendor("TestVendor"))
+        expect(fn () => $this->config->addVendor("TestVendor"))
             ->toThrow(DirectoryNotFoundException::class);
     });
 

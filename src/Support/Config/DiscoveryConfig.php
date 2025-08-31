@@ -64,7 +64,7 @@ class DiscoveryConfig
     {
         if (interface_exists($name)) {
             $name = class_basename($name);
-            
+
             if (!in_array($name, $this->interfaces)) {
                 $this->interfaces[] = $name;
             }

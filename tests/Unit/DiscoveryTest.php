@@ -34,7 +34,7 @@ describe("Discovery Tests", function (): void {
         // The cache method will throw an ErrorException when the file doesn't exist
         expect(function (): void {
             Discovery::cache("nonexistent-interface");
-        })->toThrow(\ErrorException::class);
+        })->toThrow(ErrorException::class);
     });
 
     test("cache returns cached data", function (): void {

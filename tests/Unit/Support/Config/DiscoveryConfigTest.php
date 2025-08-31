@@ -1,5 +1,6 @@
 <?php
 
+use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
 use Tests\TestHelpers\AnotherTestInterface;
@@ -40,24 +41,24 @@ describe("DiscoveryConfig", function (): void {
     });
 
     test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn (): \EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
+        expect(fn(): DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
             ->toThrow(DirectoryNotFoundException::class);
     });
 
     test("addVendor enables vendor search and adds vendor", function (): void {
-        $result = Discovery::refresh()->addVendor("EncoreDigitalGroup");
+        $result = Discovery::refresh()->addVendor("laravel");
 
         expect($result)->toBe(Discovery::config())
-            ->and(Discovery::config()->vendors)->toContain("encoredigitalgroup")
+            ->and(Discovery::config()->vendors)->toContain("laravel")
             ->and(Discovery::config()->shouldSearchVendors())->toBeTrue();
     });
 
     test("addVendor converts vendor name to lowercase", function (): void {
-        $result = Discovery::refresh()->addVendor("EncoreDigitalGroup");
+        $result = Discovery::refresh()->addVendor("Laravel");
 
         expect($result)->toBe(Discovery::config())
-            ->and(Discovery::config()->vendors)->toContain("encoredigitalgroup")
-            ->and(Discovery::config()->vendors)->not->toContain("EncoreDigitalGroup")
+            ->and(Discovery::config()->vendors)->toContain("laravel")
+            ->and(Discovery::config()->vendors)->not->toContain("Laravel")
             ->and(Discovery::config()->shouldSearchVendors())->toBeTrue();
     });
 

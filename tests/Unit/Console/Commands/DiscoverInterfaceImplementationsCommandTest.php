@@ -123,7 +123,7 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
     });
 
     test("directories method includes specific vendors when configured", function (): void {
-        Discovery::config()->addVendor("encoredigitalgroup");
+        Discovery::config()->addVendor("laravel");
 
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
@@ -132,7 +132,7 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
 
         $directories = $directoriesMethod->invoke($command);
 
-        expect($directories)->toContain(base_path("vendor/encoredigitalgroup"));
+        expect($directories)->toContain(base_path("vendor/laravel"));
 
         // Reset to prevent issues in other tests
         Discovery::config()->searchVendors(false);

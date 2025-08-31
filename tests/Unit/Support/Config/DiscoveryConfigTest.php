@@ -3,6 +3,8 @@
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
+use EncoreDigitalGroup\StdLib\Objects\Filesystem\Directory;
+use Illuminate\Support\Facades\File;
 use Tests\TestHelpers\AnotherTestInterface;
 use Tests\TestHelpers\TestInterface;
 
@@ -15,26 +17,25 @@ beforeEach(function (): void {
         }
     }
 
-    mkdir(__DIR__ . "/vendor/laravel", recursive: true);
-});
-
-afterEach(function (): void {
-    rmdir(__DIR__ . "/vendor/laravel");
+    $vendorDir = base_path("/vendor/laravel");
+    if (!is_dir($vendorDir)) {
+        mkdir($vendorDir, 0755, true);
+    }
 });
 
 describe("DiscoveryConfig", function (): void {
     test("constructor sets default cache path", function (): void {
         $expectedPath = base_path("bootstrap/cache/discovery");
 
-        expect(Discovery::config()->cachePath)->toEqual($expectedPath);
+        expect(Discovery::refresh()->cachePath)->toEqual($expectedPath);
     });
 
     test("constructor initializes empty vendors array", function (): void {
-        expect(Discovery::config()->vendors)->toEqual([]);
+        expect(Discovery::refresh()->vendors)->toEqual([]);
     });
 
     test("constructor initializes empty interfaces array", function (): void {
-        expect(Discovery::config()->interfaces)->toEqual([]);
+        expect(Discovery::refresh()->interfaces)->toEqual([]);
     });
 
     test("only adds existing interfaces", function (): void {
@@ -47,7 +48,7 @@ describe("DiscoveryConfig", function (): void {
     });
 
     test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn (): DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
+        expect(fn(): DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
             ->toThrow(DirectoryNotFoundException::class);
     });
 

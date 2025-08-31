@@ -30,7 +30,6 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.9",
         "larastan/larastan": "^3",
-        "laravel/framework": "^11|^12",
         "neronmoon/scriptsdev": "^0.1.9",
         "orchestra/testbench": "^10",
         "pestphp/pest": "^3.8",

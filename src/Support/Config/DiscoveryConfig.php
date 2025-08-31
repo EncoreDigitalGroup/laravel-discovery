@@ -12,7 +12,7 @@ class DiscoveryConfig
 
     public function __construct()
     {
-        $this->cachePath = base_path("boostrap/cache/discovery");
+        $this->cachePath = base_path("bootstrap/cache/discovery");
     }
 
     public function addVendor(string $vendor): self

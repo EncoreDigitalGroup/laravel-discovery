@@ -31,7 +31,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
     public function handle(): void
     {
         foreach (Discovery::config()->interfaces as $interface) {
-            $this->discover($interface, Discovery::config()->cachePath . "/{$interface}.php}");
+            $this->discover($interface, Discovery::config()->cachePath . "/{$interface}.php");
         }
     }
 

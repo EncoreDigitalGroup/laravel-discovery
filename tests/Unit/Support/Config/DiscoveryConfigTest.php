@@ -1,6 +1,7 @@
 <?php
 
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
+use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
 use Tests\TestHelpers\AnotherTestInterface;
 use Tests\TestHelpers\TestInterface;
@@ -13,122 +14,120 @@ beforeEach(function (): void {
             return "/mock/base/path" . ($path ? "/" . ltrim($path, "/") : "");
         }
     }
-
-    $this->config = new DiscoveryConfig;
 });
 
 describe("DiscoveryConfig", function (): void {
     test("constructor sets default cache path", function (): void {
         $expectedPath = base_path("bootstrap/cache/discovery");
 
-        expect($this->config->cachePath)->toEqual($expectedPath);
+        expect(Discovery::config()->cachePath)->toEqual($expectedPath);
     });
 
     test("constructor initializes empty vendors array", function (): void {
-        expect($this->config->vendors)->toEqual([]);
+        expect(Discovery::config()->vendors)->toEqual([]);
     });
 
     test("constructor initializes empty interfaces array", function (): void {
-        expect($this->config->interfaces)->toEqual([]);
+        expect(Discovery::config()->interfaces)->toEqual([]);
     });
 
     test("only adds existing interfaces", function (): void {
-        $this->config
+        Discovery::refresh()
             ->addInterface(TestInterface::class)
             ->addInterface("NonExistentInterface")
             ->addInterface(AnotherTestInterface::class);
 
-        expect($this->config->interfaces)->toEqual(["TestInterface", "AnotherTestInterface"]);
+        expect(Discovery::config()->interfaces)->toEqual(["TestInterface", "AnotherTestInterface"]);
     });
 
     test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn() => $this->config->addVendor("TestVendor"))
+        expect(fn() => Discovery::refresh()->addVendor("TestVendor"))
             ->toThrow(DirectoryNotFoundException::class);
     });
 
     test("addVendor enables vendor search and adds vendor", function (): void {
-        $result = $this->config->addVendor("EncoreDigitalGroup");
+        $result = Discovery::refresh()->addVendor("EncoreDigitalGroup");
 
-        expect($result)->toBe($this->config)
-            ->and($this->config->vendors)->toContain("encoredigitalgroup")
-            ->and($this->config->shouldSearchVendors())->toBeTrue();
+        expect($result)->toBe(Discovery::config())
+            ->and(Discovery::config()->vendors)->toContain("encoredigitalgroup")
+            ->and(Discovery::config()->shouldSearchVendors())->toBeTrue();
     });
 
     test("addVendor converts vendor name to lowercase", function (): void {
-        $result = $this->config->addVendor("EncoreDigitalGroup");
+        $result = Discovery::refresh()->addVendor("EncoreDigitalGroup");
 
-        expect($result)->toBe($this->config)
-            ->and($this->config->vendors)->toContain("encoredigitalgroup")
-            ->and($this->config->vendors)->not->toContain("EncoreDigitalGroup")
-            ->and($this->config->shouldSearchVendors())->toBeTrue();
+        expect($result)->toBe(Discovery::config())
+            ->and(Discovery::config()->vendors)->toContain("encoredigitalgroup")
+            ->and(Discovery::config()->vendors)->not->toContain("EncoreDigitalGroup")
+            ->and(Discovery::config()->shouldSearchVendors())->toBeTrue();
     });
 
     test("addVendor prevents duplicate vendors", function (): void {
-        $this->config
-            ->addVendor("EncoreDigitalGroup")
-            ->addVendor("EncoreDigitalGroup");
+        Discovery::refresh()
+            ->addVendor("laravel")
+            ->addVendor("Laravel");
 
-        expect($this->config->vendors)->toHaveCount(1)
-            ->and($this->config->vendors)->toContain("encoredigitalgroup");
+        expect(Discovery::config()->vendors)->toHaveCount(1)
+            ->and(Discovery::config()->vendors)->toContain("laravel");
     });
 
     test("addVendor prevents duplicate vendors with different case", function (): void {
-        $this->config
-            ->addVendor("EncoreDigitalGroup")
-            ->addVendor("encoredigitalgroup")
-            ->addVendor("ENCOREDIGITALGROUP");
+        Discovery::refresh()
+            ->addVendor("Laravel")
+            ->addVendor("laravel")
+            ->addVendor("LARAVEL");
 
-        expect($this->config->vendors)->toHaveCount(1)
-            ->and($this->config->vendors)->toContain("encoredigitalgroup");
+        expect(Discovery::config()->vendors)->toHaveCount(1)
+            ->and(Discovery::config()->vendors)->toContain("laravel");
     });
 
     test("searchVendors can be enabled and disabled", function (): void {
-        expect($this->config->shouldSearchVendors())->toBeFalse();
+        expect(Discovery::refresh()->shouldSearchVendors())->toBeFalse();
 
-        $result = $this->config->searchVendors();
-        expect($result)->toBe($this->config)
-            ->and($this->config->shouldSearchVendors())->toBeTrue();
+        $result = Discovery::config()->searchVendors();
+        expect($result)->toBe(Discovery::config())
+            ->and(Discovery::config()->shouldSearchVendors())->toBeTrue();
 
-        $this->config->searchVendors(false);
-        expect($this->config->shouldSearchVendors())->toBeFalse();
+        Discovery::config()->searchVendors(false);
+        expect(Discovery::config()->shouldSearchVendors())->toBeFalse();
     });
 
     test("searchAllVendors can be enabled and disabled", function (): void {
-        expect($this->config->shouldSearchAllVendors())->toBeFalse();
+        expect(Discovery::refresh()->shouldSearchAllVendors())->toBeFalse();
 
-        $result = $this->config->searchAllVendors();
-        expect($result)->toBe($this->config)
-            ->and($this->config->shouldSearchAllVendors())->toBeTrue();
+        $result = Discovery::config()->searchAllVendors();
+        expect($result)->toBe(Discovery::config())
+            ->and(Discovery::config()->shouldSearchAllVendors())->toBeTrue();
 
-        $this->config->searchAllVendors(false);
-        expect($this->config->shouldSearchAllVendors())->toBeFalse();
+        Discovery::config()->searchAllVendors(false);
+        expect(Discovery::config()->shouldSearchAllVendors())->toBeFalse();
     });
 
     test("method chaining works with vendor methods", function (): void {
-        $result = $this->config
+        $result = Discovery::refresh()
             ->searchVendors()
             ->searchAllVendors()
             ->addVendor("laravel");
 
-        expect($result)->toBe($this->config)
-            ->and($this->config->vendors)->toEqual(["laravel"])
-            ->and($this->config->shouldSearchVendors())->toBeTrue()
-            ->and($this->config->shouldSearchAllVendors())->toBeTrue();
+        expect($result)->toBe(Discovery::config())
+            ->and(Discovery::config()->vendors)->toEqual(["laravel"])
+            ->and(Discovery::config()->shouldSearchVendors())->toBeTrue()
+            ->and(Discovery::config()->shouldSearchAllVendors())->toBeTrue();
     });
 
     test("addInterface prevents duplicate interfaces", function (): void {
-        $this->config
+        Discovery::refresh()
             ->addInterface(TestInterface::class)
             ->addInterface(TestInterface::class);
 
-        expect($this->config->interfaces)->toEqual(["TestInterface"]);
+        expect(Discovery::config()->interfaces)->toEqual(["TestInterface"]);
     });
 
     test("invalid interface not added to interfaces array", function (): void {
-        $this->config
+        Discovery::refresh()
             ->addInterface("")
             ->addInterface("FakeInterface");
 
-        expect($this->config->interfaces)->not->toContain("", "FakeInterface");
+        expect(Discovery::config()->interfaces)->not->toContain("", "FakeInterface");
     });
 });

@@ -41,7 +41,7 @@ describe("DiscoveryConfig", function (): void {
     });
 
     test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn() => Discovery::refresh()->addVendor("TestVendor"))
+        expect(fn(): \EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
             ->toThrow(DirectoryNotFoundException::class);
     });
 

@@ -48,7 +48,7 @@ class Discovery
     public static function refresh(): DiscoveryConfig
     {
         if (!App::environment(["testing"])) {
-            throw new RuntimeException('Discovery::refresh() can only be used in testing environments.');
+            throw new RuntimeException("Discovery::refresh() can only be used in testing environments.");
         }
 
         self::$instance = new self;

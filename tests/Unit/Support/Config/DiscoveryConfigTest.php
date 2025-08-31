@@ -47,7 +47,7 @@ describe("DiscoveryConfig", function (): void {
     });
 
     test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn(): DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
+        expect(fn (): DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
             ->toThrow(DirectoryNotFoundException::class);
     });
 

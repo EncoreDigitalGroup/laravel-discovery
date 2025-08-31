@@ -3,8 +3,6 @@
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
-use EncoreDigitalGroup\StdLib\Objects\Filesystem\Directory;
-use Illuminate\Support\Facades\File;
 use Tests\TestHelpers\AnotherTestInterface;
 use Tests\TestHelpers\TestInterface;
 
@@ -48,7 +46,7 @@ describe("DiscoveryConfig", function (): void {
     });
 
     test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn(): DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
+        expect(fn (): DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
             ->toThrow(DirectoryNotFoundException::class);
     });
 

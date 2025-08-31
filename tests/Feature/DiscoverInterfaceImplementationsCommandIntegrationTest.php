@@ -1,8 +1,8 @@
 <?php
 
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
-use Tests\TestHelpers\TestInterface;
 use Tests\TestHelpers\AnotherTestInterface;
+use Tests\TestHelpers\TestInterface;
 
 beforeEach(function (): void {
     $this->cachePath = Discovery::config()->cachePath;
@@ -34,14 +34,14 @@ describe("DiscoverInterfaceImplementationsCommand Integration Tests", function (
         // Verify cache files were created
         $testCacheFile = $this->cachePath . "/TestInterface.php";
         $anotherCacheFile = $this->cachePath . "/AnotherTestInterface.php";
-        
+
         expect(file_exists($testCacheFile))->toBeTrue()
             ->and(file_exists($anotherCacheFile))->toBeTrue();
 
         // Verify cache files contain arrays
         $testCache = require $testCacheFile;
         $anotherCache = require $anotherCacheFile;
-        
+
         expect($testCache)->toBeArray()
             ->and($anotherCache)->toBeArray();
     });
@@ -54,7 +54,7 @@ describe("DiscoverInterfaceImplementationsCommand Integration Tests", function (
 
         expect(Discovery::config()->shouldSearchVendors())->toBeTrue()
             ->and(Discovery::config()->vendors)->toContain("test-vendor");
-            
+
         // Reset to avoid timeout on actual vendor search
         Discovery::config()->searchVendors(false);
         Discovery::config()->vendors = [];
@@ -70,7 +70,7 @@ describe("DiscoverInterfaceImplementationsCommand Integration Tests", function (
             ->searchAllVendors(true);
 
         expect(Discovery::config()->shouldSearchAllVendors())->toBeTrue();
-        
+
         // Reset to avoid timeout on actual vendor search
         Discovery::config()->searchAllVendors(false);
 
@@ -121,7 +121,7 @@ describe("DiscoverInterfaceImplementationsCommand Integration Tests", function (
 
         $implementations = require $cacheFile;
         expect($implementations)->toBeArray();
-        
+
         // Cache file should contain valid PHP array structure
         $cacheContent = file_get_contents($cacheFile);
         expect($cacheContent)->toStartWith("<?php")
@@ -132,7 +132,7 @@ describe("DiscoverInterfaceImplementationsCommand Integration Tests", function (
         // Create app_modules directory temporarily
         $appModulesPath = base_path("app_modules");
         $shouldCleanup = false;
-        
+
         if (!is_dir($appModulesPath)) {
             mkdir($appModulesPath, 0755, true);
             $shouldCleanup = true;
@@ -156,7 +156,7 @@ describe("DiscoverInterfaceImplementationsCommand Integration Tests", function (
         // Create app-modules directory temporarily
         $appModulesPath = base_path("app-modules");
         $shouldCleanup = false;
-        
+
         if (!is_dir($appModulesPath)) {
             mkdir($appModulesPath, 0755, true);
             $shouldCleanup = true;

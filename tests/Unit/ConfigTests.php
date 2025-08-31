@@ -40,12 +40,45 @@ describe("Discovery Config Tests", function (): void {
         expect($this->config->interfaces)->toEqual(["TestInterface", "AnotherTestInterface"]);
     });
 
+    test("addVendor throws exception when vendor directory does not exist", function (): void {
+        expect(fn() => $this->config->addVendor("TestVendor"))
+            ->toThrow(\EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException::class);
+    });
+
     test("addVendor enables vendor search and adds vendor", function (): void {
-        $result = $this->config->addVendor("encoredigitalgroup");
+        $result = $this->config->addVendor("EncoreDigitalGroup");
 
         expect($result)->toBe($this->config)
             ->and($this->config->vendors)->toContain("encoredigitalgroup")
             ->and($this->config->shouldSearchVendors())->toBeTrue();
+    });
+
+    test("addVendor converts vendor name to lowercase", function (): void {
+        $result = $this->config->addVendor("EncoreDigitalGroup");
+
+        expect($result)->toBe($this->config)
+            ->and($this->config->vendors)->toContain("encoredigitalgroup")
+            ->and($this->config->vendors)->not->toContain("EncoreDigitalGroup")
+            ->and($this->config->shouldSearchVendors())->toBeTrue();
+    });
+
+    test("addVendor prevents duplicate vendors", function (): void {
+        $this->config
+            ->addVendor("EncoreDigitalGroup")
+            ->addVendor("EncoreDigitalGroup");
+
+        expect($this->config->vendors)->toHaveCount(1)
+            ->and($this->config->vendors)->toContain("encoredigitalgroup");
+    });
+
+    test("addVendor prevents duplicate vendors with different case", function (): void {
+        $this->config
+            ->addVendor("EncoreDigitalGroup")
+            ->addVendor("encoredigitalgroup")
+            ->addVendor("ENCOREDIGITALGROUP");
+
+        expect($this->config->vendors)->toHaveCount(1)
+            ->and($this->config->vendors)->toContain("encoredigitalgroup");
     });
 
     test("searchVendors can be enabled and disabled", function (): void {

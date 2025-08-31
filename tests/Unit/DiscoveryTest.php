@@ -8,7 +8,7 @@ beforeEach(function (): void {
     // Tests will work with the singleton pattern as intended
 });
 
-describe("Discovery Tests", function (): void {
+describe("Discovery", function (): void {
     test("make returns singleton instance", function (): void {
         $discovery1 = Discovery::make();
         $discovery2 = Discovery::make();

@@ -2,6 +2,7 @@
 
 use EncoreDigitalGroup\LaravelDiscovery\Console\Commands\DiscoverInterfaceImplementationsCommand;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
+use Illuminate\Support\Facades\Artisan;
 use Tests\TestHelpers\TestInterface;
 
 beforeEach(function (): void {
@@ -22,7 +23,7 @@ afterEach(function (): void {
     }
 });
 
-describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void {
+describe("DiscoverInterfaceImplementationsCommand", function (): void {
     test("discover method throws exception for empty interface name", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
@@ -245,5 +246,65 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
         // Cleanup
         unlink($testDir . "/minimal.php");
         rmdir($testDir);
+    });
+
+    test("command runs successfully with no interfaces configured", function (): void {
+        $result = Artisan::call(DiscoverInterfaceImplementationsCommand::class);
+
+        expect($result)->toBe(0);
+    });
+
+    test("command runs successfully with configured interfaces", function (): void {
+        Discovery::config()
+            ->addInterface(TestInterface::class);
+
+        $this->artisan("discovery:run")
+            ->assertExitCode(0);
+
+        // Verify cache files were created
+        $testCacheFile = $this->cachePath . "/TestInterface.php";
+        expect(file_exists($testCacheFile))->toBeTrue();
+
+        // Verify cache files contain arrays
+        $testCache = require $testCacheFile;
+        expect($testCache)->toBeArray();
+    });
+
+    test("command creates cache directory structure", function (): void {
+        // Remove cache directory if it exists
+        if (is_dir($this->cachePath)) {
+            $files = glob($this->cachePath . "/*");
+            foreach ($files as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+            rmdir($this->cachePath);
+        }
+
+        Discovery::config()->addInterface(TestInterface::class);
+
+        $this->artisan("discovery:run")
+            ->assertExitCode(0);
+
+        expect(is_dir($this->cachePath))->toBeTrue();
+    });
+
+    test("command creates cache files with proper structure", function (): void {
+        Discovery::config()->addInterface(TestInterface::class);
+
+        $this->artisan("discovery:run")
+            ->assertExitCode(0);
+
+        $cacheFile = $this->cachePath . "/TestInterface.php";
+        expect(file_exists($cacheFile))->toBeTrue();
+
+        $implementations = require $cacheFile;
+        expect($implementations)->toBeArray();
+
+        // Cache file should contain valid PHP array structure
+        $cacheContent = file_get_contents($cacheFile);
+        expect($cacheContent)->toStartWith("<?php")
+            ->and($cacheContent)->toContain("return");
     });
 });

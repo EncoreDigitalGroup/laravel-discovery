@@ -8,7 +8,7 @@ beforeEach(function (): void {
     $this->serviceProvider = new DiscoveryServiceProvider($this->app);
 });
 
-describe("ServiceProvider Tests", function (): void {
+describe("DiscoveryServiceProvider", function (): void {
     test("service provider registers without error", function (): void {
         $this->serviceProvider->register();
 

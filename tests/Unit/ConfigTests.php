@@ -16,7 +16,7 @@ beforeEach(function (): void {
     $this->config = new DiscoveryConfig;
 });
 
-describe("Discovery Config Tests", function (): void {
+describe("DiscoveryConfig", function (): void {
     test("constructor sets default cache path", function (): void {
         $expectedPath = base_path("bootstrap/cache/discovery");
 
@@ -114,5 +114,21 @@ describe("Discovery Config Tests", function (): void {
             ->and($this->config->vendors)->toEqual(["encoredigitalgroup", "laravel"])
             ->and($this->config->shouldSearchVendors())->toBeTrue()
             ->and($this->config->shouldSearchAllVendors())->toBeTrue();
+    });
+
+    test("addInterface prevents duplicate interfaces", function (): void {
+        $this->config
+            ->addInterface(TestInterface::class)
+            ->addInterface(TestInterface::class);
+
+        expect($this->config->interfaces)->toEqual(["TestInterface"]);
+    });
+
+    test("invalid interface not added to interfaces array", function (): void {
+        $this->config
+            ->addInterface("")
+            ->addInterface("FakeInterface");
+
+        expect($this->config->interfaces)->not->toContain("", "FakeInterface");
     });
 });

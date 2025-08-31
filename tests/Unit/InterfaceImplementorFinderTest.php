@@ -11,7 +11,7 @@ beforeEach(function (): void {
     $this->finder = new InterfaceImplementorFinder;
 });
 
-describe("InterfaceImplementorFinder Test", function (): void {
+describe("InterfaceImplementorFinder", function (): void {
     test("get implementing classes returns empty array initially", function (): void {
         $result = $this->finder->getImplementingClasses();
 

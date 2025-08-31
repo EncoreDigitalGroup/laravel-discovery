@@ -14,6 +14,12 @@ beforeEach(function (): void {
             return "/mock/base/path" . ($path ? "/" . ltrim($path, "/") : "");
         }
     }
+
+    mkdir(__DIR__ . "/vendor/laravel", recursive: true);
+});
+
+afterEach(function (): void {
+    rmdir(__DIR__ . "/vendor/laravel");
 });
 
 describe("DiscoveryConfig", function (): void {

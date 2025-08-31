@@ -10,6 +10,19 @@ beforeEach(function (): void {
     if (!is_dir($this->cachePath)) {
         mkdir($this->cachePath, 0755, true);
     }
+
+    // Mock base_path function if it doesn't exist
+    if (!function_exists("base_path")) {
+        function base_path($path = ""): string
+        {
+            return "/mock/base/path" . ($path ? "/" . ltrim($path, "/") : "");
+        }
+    }
+
+    $vendorDir = base_path("/vendor/laravel");
+    if (!is_dir($vendorDir)) {
+        mkdir($vendorDir, 0755, true);
+    }
 });
 
 afterEach(function (): void {

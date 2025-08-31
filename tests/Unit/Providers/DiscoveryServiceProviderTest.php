@@ -12,20 +12,21 @@ describe("DiscoveryServiceProvider", function (): void {
     test("service provider registers without error", function (): void {
         $this->serviceProvider->register();
 
-        // If we get here without exception, registration worked
         expect(true)->toBeTrue();
     });
 
     test("service provider boots without error", function (): void {
         $this->serviceProvider->boot();
 
+        // If we get here without exception, boot worked
         expect(true)->toBeTrue();
     });
 
-    test("service provider can be instantiated", function (): void {
+    test("service provider can be instantiated and extends laravel base service provider", function (): void {
         $provider = new DiscoveryServiceProvider($this->app);
 
-        expect($provider)->toBeInstanceOf(DiscoveryServiceProvider::class);
+        expect($provider)->toBeInstanceOf(DiscoveryServiceProvider::class)
+            ->and($provider)->toBeInstanceOf(ServiceProvider::class);
     });
 
     test("service provider has required methods", function (): void {
@@ -33,9 +34,5 @@ describe("DiscoveryServiceProvider", function (): void {
             ->and(method_exists($this->serviceProvider, "boot"))->toBeTrue()
             ->and(is_callable([$this->serviceProvider, "register"]))->toBeTrue()
             ->and(is_callable([$this->serviceProvider, "boot"]))->toBeTrue();
-    });
-
-    test("service provider extends laravel base service provider", function (): void {
-        expect($this->serviceProvider)->toBeInstanceOf(ServiceProvider::class);
     });
 });

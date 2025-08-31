@@ -35,7 +35,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("discover method throws exception for empty interface name", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $discoverMethod = $reflection->getMethod('discover');
+        $discoverMethod = $reflection->getMethod("discover");
         $discoverMethod->setAccessible(true);
 
         expect(function () use ($command, $discoverMethod): void {
@@ -46,18 +46,18 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("discover method validates interface name parameter", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $discoverMethod = $reflection->getMethod('discover');
+        $discoverMethod = $reflection->getMethod("discover");
         $discoverMethod->setAccessible(true);
 
         // Test that non-empty interface name is properly validated
         expect($discoverMethod->isPrivate())->toBeTrue()
-            ->and($reflection->hasMethod('discover'))->toBeTrue();
+            ->and($reflection->hasMethod("discover"))->toBeTrue();
     });
 
     test("directories method returns default app path", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod('directories');
+        $directoriesMethod = $reflection->getMethod("directories");
         $directoriesMethod->setAccessible(true);
 
         $directories = $directoriesMethod->invoke($command);
@@ -68,7 +68,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("directories method includes app_modules when it exists", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod('directories');
+        $directoriesMethod = $reflection->getMethod("directories");
         $directoriesMethod->setAccessible(true);
 
         // Create temporary app_modules directory
@@ -92,7 +92,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("directories method includes app-modules when it exists", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod('directories');
+        $directoriesMethod = $reflection->getMethod("directories");
         $directoriesMethod->setAccessible(true);
 
         // Create temporary app-modules directory
@@ -118,7 +118,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
 
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod('directories');
+        $directoriesMethod = $reflection->getMethod("directories");
         $directoriesMethod->setAccessible(true);
 
         $directories = $directoriesMethod->invoke($command);
@@ -135,7 +135,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
 
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod('directories');
+        $directoriesMethod = $reflection->getMethod("directories");
         $directoriesMethod->setAccessible(true);
 
         $directories = $directoriesMethod->invoke($command);
@@ -150,7 +150,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("traverse method handles controlled directory without crashing", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod('traverse');
+        $traverseMethod = $reflection->getMethod("traverse");
         $traverseMethod->setAccessible(true);
 
         // Test with tests directory (small and controlled)
@@ -164,14 +164,14 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("command signature and description are correctly set", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
 
-        expect($command->getName())->toBe('discovery:run')
-            ->and($command->getDescription())->toBe('Generate a list of classes implementing Tenant interfaces');
+        expect($command->getName())->toBe("discovery:run")
+            ->and($command->getDescription())->toBe("Generate a list of classes implementing Tenant interfaces");
     });
 
     test("traverse method handles parsing errors gracefully", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod('traverse');
+        $traverseMethod = $reflection->getMethod("traverse");
         $traverseMethod->setAccessible(true);
 
         // Create a temporary directory with an invalid PHP file
@@ -193,7 +193,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("traverse method skips non-php files", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod('traverse');
+        $traverseMethod = $reflection->getMethod("traverse");
         $traverseMethod->setAccessible(true);
 
         // Create a temporary directory with a non-PHP file
@@ -215,7 +215,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("traverse method handles empty files", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod('traverse');
+        $traverseMethod = $reflection->getMethod("traverse");
         $traverseMethod->setAccessible(true);
 
         // Create a temporary directory with an empty PHP file
@@ -237,7 +237,7 @@ describe("DiscoverInterfaceImplementationsCommand Unit Tests", function (): void
     test("traverse method handles null AST from parser", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod('traverse');
+        $traverseMethod = $reflection->getMethod("traverse");
         $traverseMethod->setAccessible(true);
 
         // Create a temporary directory with minimal PHP file that might return null AST

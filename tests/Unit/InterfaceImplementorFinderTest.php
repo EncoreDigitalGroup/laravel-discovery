@@ -75,6 +75,7 @@ describe("InterfaceImplementorFinder Test", function (): void {
         // Test class with different interface
         $classNode1 = new Class_(new Identifier("TestClass"));
         $classNode1->implements = [new Name("DifferentInterface")];
+
         $this->finder->enterNode($classNode1);
         expect($this->finder->getImplementingClasses())->toEqual([]);
 

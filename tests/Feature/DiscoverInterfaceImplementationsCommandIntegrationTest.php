@@ -124,8 +124,8 @@ describe("DiscoverInterfaceImplementationsCommand Integration Tests", function (
         
         // Cache file should contain valid PHP array structure
         $cacheContent = file_get_contents($cacheFile);
-        expect($cacheContent)->toStartWith('<?php')
-            ->and($cacheContent)->toContain('return');
+        expect($cacheContent)->toStartWith("<?php")
+            ->and($cacheContent)->toContain("return");
     });
 
     test("command handles app_modules directory", function (): void {

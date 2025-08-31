@@ -87,8 +87,9 @@ describe("Discovery Tests", function (): void {
 
         // Test that constructor initializes config properly
         $reflection = new ReflectionClass($discovery);
-        $configProperty = $reflection->getProperty('config');
+        $configProperty = $reflection->getProperty("config");
         $configProperty->setAccessible(true);
+
         $config = $configProperty->getValue($discovery);
 
         expect($config)->toBeInstanceOf(DiscoveryConfig::class);

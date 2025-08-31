@@ -34,7 +34,7 @@ describe("Discovery Tests", function (): void {
         // The cache method will throw an ErrorException when the file doesn't exist
         expect(function (): void {
             Discovery::cache("nonexistent-interface");
-        })->toThrow(\ErrorException::class);
+        })->toThrow(ErrorException::class);
     });
 
     test("cache returns cached data", function (): void {
@@ -50,5 +50,48 @@ describe("Discovery Tests", function (): void {
 
         // Cleanup
         unlink($cacheFile);
+    });
+
+    test("cache method handles class_exists check correctly", function (): void {
+        // Create a cache file that can be loaded by the cache method
+        $testData = ["Implementation1", "Implementation2"];
+        $cacheFile = base_path("TestKey.php");
+
+        file_put_contents($cacheFile, "<?php\n\nreturn " . var_export($testData, true) . ";\n");
+
+        // Test with a string that might be treated as a class but isn't
+        $result = Discovery::cache("TestKey");
+
+        expect($result)->toEqual($testData);
+
+        // Cleanup
+        unlink($cacheFile);
+    });
+
+    test("cache works with non-class string keys", function (): void {
+        $testData = ["Implementation1", "Implementation2"];
+        $cacheFile = base_path("some-interface.php");
+
+        file_put_contents($cacheFile, "<?php\n\nreturn " . var_export($testData, true) . ";\n");
+
+        $result = Discovery::cache("some-interface");
+
+        expect($result)->toEqual($testData);
+
+        // Cleanup
+        unlink($cacheFile);
+    });
+
+    test("constructor creates config instance", function (): void {
+        $discovery = new Discovery;
+
+        // Test that constructor initializes config properly
+        $reflection = new ReflectionClass($discovery);
+        $configProperty = $reflection->getProperty("config");
+        $configProperty->setAccessible(true);
+
+        $config = $configProperty->getValue($discovery);
+
+        expect($config)->toBeInstanceOf(DiscoveryConfig::class);
     });
 });

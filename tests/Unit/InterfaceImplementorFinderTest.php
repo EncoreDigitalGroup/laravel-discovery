@@ -12,15 +12,6 @@ beforeEach(function (): void {
 });
 
 describe("InterfaceImplementorFinder Test", function (): void {
-    test("set interface name sets interface name", function (): void {
-        $interfaceName = "TestInterface";
-
-        $this->finder->setInterfaceName($interfaceName);
-
-        // We can't directly test the private property, but we can test the behavior
-        expect($this->finder)->toBeInstanceOf(InterfaceImplementorFinder::class);
-    });
-
     test("get implementing classes returns empty array initially", function (): void {
         $result = $this->finder->getImplementingClasses();
 
@@ -44,99 +35,59 @@ describe("InterfaceImplementorFinder Test", function (): void {
         expect($result)->toBeNull();
     });
 
-    test("enter node processes class with interface", function (): void {
+    test("enter node processes class with matching interface", function (): void {
         $this->finder->setInterfaceName("TestInterface");
 
-        // First set namespace
-        $namespaceName = new Name('App\Test');
+        // Set namespace
+        $namespaceName = new Name("App\Test");
         $namespaceNode = new Namespace_($namespaceName);
         $this->finder->enterNode($namespaceNode);
 
-        // Create class node with interface
+        // Test both simple and fully qualified interface names
         $className = new Identifier("TestClass");
         $interfaceName = new Name("TestInterface");
         $classNode = new Class_($className);
         $classNode->implements = [$interfaceName];
 
         $result = $this->finder->enterNode($classNode);
+        expect($result)->toBeNull()
+            ->and($this->finder->getImplementingClasses())
+            ->toContain('App\Test\TestClass');
 
-        expect($result)->toBeNull();
-        $implementations = $this->finder->getImplementingClasses();
-        expect($implementations)->toContain('App\Test\TestClass');
+        // Test fully qualified interface
+        $className2 = new Identifier("TestClass2");
+        $interfaceName2 = new Name('Some\Other\Namespace\TestInterface');
+        $classNode2 = new Class_($className2);
+        $classNode2->implements = [$interfaceName2];
+
+        $this->finder->enterNode($classNode2);
+        expect($this->finder->getImplementingClasses())->toContain('App\Test\TestClass2');
     });
 
-    test("enter node processes class with fully qualified interface", function (): void {
+    test("enter node ignores non-matching classes", function (): void {
         $this->finder->setInterfaceName("TestInterface");
 
-        // First set namespace
+        // Set namespace
         $namespaceName = new Name('App\Test');
         $namespaceNode = new Namespace_($namespaceName);
         $this->finder->enterNode($namespaceNode);
 
-        // Create class node with fully qualified interface
-        $className = new Identifier("TestClass");
-        $interfaceName = new Name('Some\Other\Namespace\TestInterface');
-        $classNode = new Class_($className);
-        $classNode->implements = [$interfaceName];
+        // Test class with different interface
+        $classNode1 = new Class_(new Identifier("TestClass"));
+        $classNode1->implements = [new Name("DifferentInterface")];
 
-        $result = $this->finder->enterNode($classNode);
+        $this->finder->enterNode($classNode1);
+        expect($this->finder->getImplementingClasses())->toEqual([]);
 
-        expect($result)->toBeNull();
-        $implementations = $this->finder->getImplementingClasses();
-        expect($implementations)->toContain('App\Test\TestClass');
-    });
+        // Test class without implements
+        $classNode2 = new Class_(new Identifier("TestClass2"));
+        $this->finder->enterNode($classNode2);
+        expect($this->finder->getImplementingClasses())->toEqual([]);
 
-    test("enter node ignores class without target interface", function (): void {
-        $this->finder->setInterfaceName("TestInterface");
-
-        // First set namespace
-        $namespaceName = new Name('App\Test');
-        $namespaceNode = new Namespace_($namespaceName);
-        $this->finder->enterNode($namespaceNode);
-
-        // Create class node with different interface
-        $className = new Identifier("TestClass");
-        $interfaceName = new Name("DifferentInterface");
-        $classNode = new Class_($className);
-        $classNode->implements = [$interfaceName];
-
-        $result = $this->finder->enterNode($classNode);
-
-        expect($result)->toBeNull();
-        $implementations = $this->finder->getImplementingClasses();
-        expect($implementations)->toEqual([]);
-    });
-
-    test("enter node ignores class without implements", function (): void {
-        $this->finder->setInterfaceName("TestInterface");
-
-        // First set namespace
-        $namespaceName = new Name('App\Test');
-        $namespaceNode = new Namespace_($namespaceName);
-        $this->finder->enterNode($namespaceNode);
-
-        // Create class node without implements
-        $className = new Identifier("TestClass");
-        $classNode = new Class_($className);
-
-        $result = $this->finder->enterNode($classNode);
-
-        expect($result)->toBeNull();
-        $implementations = $this->finder->getImplementingClasses();
-        expect($implementations)->toEqual([]);
-    });
-
-    test("enter node ignores class without name", function (): void {
-        $this->finder->setInterfaceName("TestInterface");
-
-        // Create anonymous class (no name)
-        $classNode = new Class_(null);
-
-        $result = $this->finder->enterNode($classNode);
-
-        expect($result)->toBeNull();
-        $implementations = $this->finder->getImplementingClasses();
-        expect($implementations)->toEqual([]);
+        // Test anonymous class
+        $classNode3 = new Class_(null);
+        $this->finder->enterNode($classNode3);
+        expect($this->finder->getImplementingClasses())->toEqual([]);
     });
 
     test("enter node processes multiple interfaces on class", function (): void {

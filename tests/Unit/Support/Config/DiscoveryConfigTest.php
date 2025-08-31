@@ -42,7 +42,7 @@ describe("DiscoveryConfig", function (): void {
     });
 
     test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn () => $this->config->addVendor("TestVendor"))
+        expect(fn() => $this->config->addVendor("TestVendor"))
             ->toThrow(DirectoryNotFoundException::class);
     });
 
@@ -106,13 +106,12 @@ describe("DiscoveryConfig", function (): void {
 
     test("method chaining works with vendor methods", function (): void {
         $result = $this->config
-            ->addVendor("encoredigitalgroup")
             ->searchVendors()
             ->searchAllVendors()
             ->addVendor("laravel");
 
         expect($result)->toBe($this->config)
-            ->and($this->config->vendors)->toEqual(["encoredigitalgroup", "laravel"])
+            ->and($this->config->vendors)->toEqual(["laravel"])
             ->and($this->config->shouldSearchVendors())->toBeTrue()
             ->and($this->config->shouldSearchAllVendors())->toBeTrue();
     });

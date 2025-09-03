@@ -1,8 +1,6 @@
 <?php
 
-use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
-use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
 use Tests\TestHelpers\AnotherTestInterface;
 use Tests\TestHelpers\TestInterface;
 

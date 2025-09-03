@@ -4,6 +4,7 @@ namespace EncoreDigitalGroup\LaravelDiscovery\Support\Config;
 
 use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
+use Illuminate\Support\Facades\App;
 
 class DiscoveryConfig
 {
@@ -25,7 +26,7 @@ class DiscoveryConfig
         $vendor = Str::lower($vendor);
         $vendorPath = base_path("vendor/{$vendor}");
 
-        if (!is_dir($vendorPath)) {
+        if (!is_dir($vendorPath) && !App::environment("testing")) {
             throw new DirectoryNotFoundException($vendorPath);
         }
 

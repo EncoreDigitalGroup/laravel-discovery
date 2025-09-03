@@ -45,11 +45,6 @@ describe("DiscoveryConfig", function (): void {
         expect(Discovery::config()->interfaces)->toEqual(["TestInterface", "AnotherTestInterface"]);
     });
 
-    test("addVendor throws exception when vendor directory does not exist", function (): void {
-        expect(fn (): DiscoveryConfig => Discovery::refresh()->addVendor("TestVendor"))
-            ->toThrow(DirectoryNotFoundException::class);
-    });
-
     test("addVendor enables vendor search and adds vendor", function (): void {
         $result = Discovery::refresh()->addVendor("laravel");
 

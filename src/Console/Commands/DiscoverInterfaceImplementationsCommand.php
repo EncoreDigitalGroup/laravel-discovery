@@ -30,9 +30,16 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
     public function handle(): void
     {
+        $this->newLine();
+        $this->info("Discovering...");
+
         foreach (Discovery::config()->interfaces as $interface) {
+            $this->info("Discovering {$interface} Implementations.");
             $this->discover($interface, Discovery::config()->cachePath . "/{$interface}.php");
         }
+
+        $this->info("Discovery Complete!");
+        $this->newLine(2);
     }
 
     private function discover(string $interfaceName, string $cachePath): void
@@ -40,9 +47,6 @@ class DiscoverInterfaceImplementationsCommand extends Command
         if ($interfaceName == Str::empty()) {
             throw new InvalidArgumentException("Interface Name Cannot Be Empty String");
         }
-
-        $this->newLine();
-        $this->info("Discovering {$interfaceName} Implementations.");
 
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
@@ -69,9 +73,6 @@ class DiscoverInterfaceImplementationsCommand extends Command
         }
 
         file_put_contents($cachePath, $fileContent);
-
-        $this->info("{$interfaceName} Discovery Complete.");
-        $this->newLine();
     }
 
     private function directories(): array

@@ -35,25 +35,34 @@ class DiscoverInterfaceImplementationsCommand extends Command
         $this->newLine();
         $this->info("Discovering...");
 
-        foreach (Discovery::config()->interfaces as $interface) {
-            $this->info("Discovering {$interface} Implementations.");
-            $this->discover($interface, Discovery::config()->cachePath . "/{$interface}.php");
+        $interfaces = Discovery::config()->interfaces;
+
+        if (empty($interfaces)) {
+            $this->warn("No interfaces configured for discovery.");
+            return;
         }
+
+        // Single-pass discovery: parse each file once and check all interfaces
+        $this->discoverAll($interfaces);
 
         $this->info("Discovery Complete!");
         $this->newLine(2);
     }
 
-    private function discover(string $interfaceName, string $cachePath): void
+    private function discoverAll(array $interfaces): void
     {
-        if ($interfaceName == Str::empty()) {
-            throw new InvalidArgumentException("Interface Name Cannot Be Empty String");
+        foreach ($interfaces as $interface) {
+            if ($interface == Str::empty()) {
+                throw new InvalidArgumentException("Interface Name Cannot Be Empty String");
+            }
         }
+
+        $this->info("Discovering " . count($interfaces) . " interface(s) in a single pass.");
 
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
         $finder = new InterfaceImplementorFinder;
-        $finder->setInterfaceName($interfaceName);
+        $finder->setInterfaceNames($interfaces);
 
         $this->traverser->addVisitor($finder);
 
@@ -65,16 +74,17 @@ class DiscoverInterfaceImplementationsCommand extends Command
             $this->traverse($directory);
         }
 
-        $implementingClasses = $finder->getImplementingClasses();
-
-        $fileContent = "<?php\n\nreturn " . var_export($implementingClasses, true) . ";\n";
-        $directory = dirname($cachePath);
-
-        if (!is_dir($directory)) {
-            mkdir($directory, 0755, true);
+        // Write cache files for each interface
+        $cachePath = Discovery::config()->cachePath;
+        if (!is_dir($cachePath)) {
+            mkdir($cachePath, 0755, true);
         }
 
-        file_put_contents($cachePath, $fileContent);
+        foreach ($interfaces as $interface) {
+            $implementingClasses = $finder->getImplementingClassesForInterface($interface);
+            $fileContent = "<?php\n\nreturn " . var_export($implementingClasses, true) . ";\n";
+            file_put_contents($cachePath . "/{$interface}.php", $fileContent);
+        }
     }
 
     private function directories(): array

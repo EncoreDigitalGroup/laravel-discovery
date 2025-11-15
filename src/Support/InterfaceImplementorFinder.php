@@ -19,11 +19,25 @@ class InterfaceImplementorFinder extends NodeVisitorAbstract
 {
     private array $implementingClasses = [];
     private string $currentNamespace = "";
-    private string $interfaceName = "";
+    private array $interfaceNames = [];
 
+    /**
+     * @deprecated Use setInterfaceNames() instead for multi-interface discovery
+     */
     public function setInterfaceName(string $interfaceName): void
     {
-        $this->interfaceName = $interfaceName;
+        $this->interfaceNames = [$interfaceName];
+    }
+
+    public function setInterfaceNames(array $interfaceNames): void
+    {
+        $this->interfaceNames = $interfaceNames;
+        // Initialize the implementing classes array for each interface
+        foreach ($interfaceNames as $interfaceName) {
+            if (!isset($this->implementingClasses[$interfaceName])) {
+                $this->implementingClasses[$interfaceName] = [];
+            }
+        }
     }
 
     public function enterNode(Node $node): null
@@ -47,17 +61,26 @@ class InterfaceImplementorFinder extends NodeVisitorAbstract
         return $this->implementingClasses;
     }
 
+    public function getImplementingClassesForInterface(string $interfaceName): array
+    {
+        return $this->implementingClasses[$interfaceName] ?? [];
+    }
+
     private function nodeImplements(Node\Stmt\Class_ $node, string $className): void
     {
-        if ($this->interfaceName == Str::empty()) {
-            throw new RuntimeException("Interface Name Property Cannot Be Empty String");
+        if (empty($this->interfaceNames)) {
+            throw new RuntimeException("Interface Names Cannot Be Empty");
         }
 
         if (isset($node->implements)) {
             foreach ($node->implements as $implement) {
-                $interfaceName = $implement->toString();
-                if ($interfaceName === $this->interfaceName || str_ends_with($interfaceName, "\\{$this->interfaceName}")) {
-                    $this->implementingClasses[] = $className;
+                $implementedInterface = $implement->toString();
+
+                // Check against all configured interfaces
+                foreach ($this->interfaceNames as $targetInterface) {
+                    if ($implementedInterface === $targetInterface || str_ends_with($implementedInterface, "\\{$targetInterface}")) {
+                        $this->implementingClasses[$targetInterface][] = $className;
+                    }
                 }
             }
         }

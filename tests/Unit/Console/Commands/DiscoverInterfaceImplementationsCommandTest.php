@@ -37,26 +37,26 @@ afterEach(function (): void {
 });
 
 describe("DiscoverInterfaceImplementationsCommand", function (): void {
-    test("discover method throws exception for empty interface name", function (): void {
+    test("discoverAll method throws exception for empty interface name", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $discoverMethod = $reflection->getMethod("discover");
-        $discoverMethod->setAccessible(true);
+        $discoverAllMethod = $reflection->getMethod("discoverAll");
+        $discoverAllMethod->setAccessible(true);
 
-        expect(function () use ($command, $discoverMethod): void {
-            $discoverMethod->invoke($command, "", "test-cache.php");
+        expect(function () use ($command, $discoverAllMethod): void {
+            $discoverAllMethod->invoke($command, [""]);
         })->toThrow(InvalidArgumentException::class, "Interface Name Cannot Be Empty String");
     });
 
-    test("discover method validates interface name parameter", function (): void {
+    test("discoverAll method validates interface name parameter", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $discoverMethod = $reflection->getMethod("discover");
-        $discoverMethod->setAccessible(true);
+        $discoverAllMethod = $reflection->getMethod("discoverAll");
+        $discoverAllMethod->setAccessible(true);
 
-        // Test that non-empty interface name is properly validated
-        expect($discoverMethod->isPrivate())->toBeTrue()
-            ->and($reflection->hasMethod("discover"))->toBeTrue();
+        // Test that method exists and is private
+        expect($discoverAllMethod->isPrivate())->toBeTrue()
+            ->and($reflection->hasMethod("discoverAll"))->toBeTrue();
     });
 
     test("directories method returns default app path", function (): void {

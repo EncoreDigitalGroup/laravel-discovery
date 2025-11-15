@@ -12,6 +12,7 @@ use EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
 use Fiber;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Date;
 use InvalidArgumentException;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
@@ -57,7 +58,8 @@ class DiscoverInterfaceImplementationsCommand extends Command
             }
         }
 
-        $this->info("Discovering " . count($interfaces) . " interface(s) in a single pass.");
+        $startedAt = Date::now();
+        $this->info("Discovering " . count($interfaces) . " interface(s).");
 
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
@@ -85,6 +87,9 @@ class DiscoverInterfaceImplementationsCommand extends Command
             $fileContent = "<?php\n\nreturn " . var_export($implementingClasses, true) . ";\n";
             file_put_contents($cachePath . "/{$interface}.php", $fileContent);
         }
+        $duration = $startedAt->diff(Date::now());
+
+        $this->info("Discovery completed in " . $duration->forHumans());
     }
 
     private function directories(): array

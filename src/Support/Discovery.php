@@ -35,6 +35,15 @@ class Discovery
         return self::make()->config;
     }
 
+    public static function path(string $key): string
+    {
+        if (class_exists($key)) {
+            $key = class_basename($key);
+        }
+
+        return base_path("{$key}.php");
+    }
+
     public static function get(string $key): array
     {
         if (class_exists($key)) {

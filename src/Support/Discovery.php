@@ -37,20 +37,20 @@ class Discovery
 
     public static function path(string $key): string
     {
-        if (class_exists($key)) {
+        if (interface_exists($key)) {
             $key = class_basename($key);
         }
 
-        return base_path("{$key}.php");
+        return Discovery::config()->cachePath . "/{$key}.php";
     }
 
     public static function get(string $key): array
     {
-        if (class_exists($key)) {
+        if (interface_exists($key)) {
             $key = class_basename($key);
         }
 
-        return require base_path("{$key}.php");
+        return require Discovery::config()->cachePath . "/{$key}.php";
     }
 
     /** @deprecated use Discovery::get() instead. */

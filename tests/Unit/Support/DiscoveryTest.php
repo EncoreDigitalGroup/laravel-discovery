@@ -42,7 +42,7 @@ describe("Discovery", function (): void {
         $cacheFile = $cachePath . "/test-interface.php";
 
         // Ensure cache directory exists
-        if (! is_dir($cachePath)) {
+        if (!is_dir($cachePath)) {
             mkdir($cachePath, 0755, true);
         }
 
@@ -63,7 +63,7 @@ describe("Discovery", function (): void {
         $cacheFile = $cachePath . "/TestKey.php";
 
         // Ensure cache directory exists
-        if (! is_dir($cachePath)) {
+        if (!is_dir($cachePath)) {
             mkdir($cachePath, 0755, true);
         }
 
@@ -84,7 +84,7 @@ describe("Discovery", function (): void {
         $cacheFile = $cachePath . "/some-interface.php";
 
         // Ensure cache directory exists
-        if (! is_dir($cachePath)) {
+        if (!is_dir($cachePath)) {
             mkdir($cachePath, 0755, true);
         }
 
@@ -134,7 +134,7 @@ describe("Discovery", function (): void {
         $cacheFile = $cachePath . "/test-interface-get.php";
 
         // Ensure cache directory exists
-        if (! is_dir($cachePath)) {
+        if (!is_dir($cachePath)) {
             mkdir($cachePath, 0755, true);
         }
 
@@ -158,7 +158,7 @@ describe("Discovery", function (): void {
         $cacheFile = $cachePath . "/GetTestInterface.php";
 
         // Ensure cache directory exists
-        if (! is_dir($cachePath)) {
+        if (!is_dir($cachePath)) {
             mkdir($cachePath, 0755, true);
         }
 

@@ -10,6 +10,7 @@ namespace EncoreDigitalGroup\LaravelDiscovery\Console\Commands;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 use EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
+use Fiber;
 use Illuminate\Console\Command;
 use InvalidArgumentException;
 use PhpParser\Error;
@@ -19,6 +20,7 @@ use PhpParser\ParserFactory;
 use PhpParser\PhpVersion;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use SplFileInfo;
 
 /** @internal */
 class DiscoverInterfaceImplementationsCommand extends Command
@@ -106,26 +108,58 @@ class DiscoverInterfaceImplementationsCommand extends Command
     private function traverse(string $directory): void
     {
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
+        $files = [];
 
+        // Collect all PHP files first
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === "php") {
-                $code = file_get_contents($file->getPathname());
-                if (!$code) {
-                    continue;
-                }
-
-                try {
-                    $ast = $this->parser->parse($code);
-
-                    if (is_null($ast)) {
-                        continue;
-                    }
-
-                    $this->traverser->traverse($ast);
-                } catch (Error) {
-                    // Skip files with parsing errors
-                }
+                $files[] = $file;
             }
+        }
+
+        // Process files in batches using Fibers for concurrency
+        $batchSize = Discovery::config()->concurrencyBatchSize;
+        $batches = array_chunk($files, $batchSize);
+
+        foreach ($batches as $batch) {
+            $this->processBatchConcurrently($batch);
+        }
+    }
+
+    private function processBatchConcurrently(array $files): void
+    {
+        $fibers = [];
+
+        // Create a Fiber for each file in the batch
+        foreach ($files as $file) {
+            $fibers[] = new Fiber(function () use ($file) {
+                $this->processFile($file);
+            });
+        }
+
+        // Start all fibers
+        foreach ($fibers as $fiber) {
+            $fiber->start();
+        }
+    }
+
+    private function processFile(SplFileInfo $file): void
+    {
+        $code = file_get_contents($file->getPathname());
+        if (!$code) {
+            return;
+        }
+
+        try {
+            $ast = $this->parser->parse($code);
+
+            if (is_null($ast)) {
+                return;
+            }
+
+            $this->traverser->traverse($ast);
+        } catch (Error) {
+            // Skip files with parsing errors
         }
     }
 }

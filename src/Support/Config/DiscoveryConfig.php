@@ -11,6 +11,7 @@ class DiscoveryConfig
     public string $cachePath;
     public array $vendors = [];
     public array $interfaces = [];
+    public int $concurrencyBatchSize = 50;
     private bool $searchVendors = false;
     private bool $searchAllVendors = false;
 
@@ -70,6 +71,13 @@ class DiscoveryConfig
                 $this->interfaces[] = $name;
             }
         }
+
+        return $this;
+    }
+
+    public function setConcurrencyBatchSize(int $size): self
+    {
+        $this->concurrencyBatchSize = max(1, $size);
 
         return $this;
     }

@@ -35,13 +35,28 @@ class Discovery
         return self::make()->config;
     }
 
-    public static function cache(string $key): array
+    public static function path(string $key): string
+    {
+        if (class_exists($key)) {
+            $key = class_basename($key);
+        }
+
+        return base_path("{$key}.php");
+    }
+
+    public static function get(string $key): array
     {
         if (class_exists($key)) {
             $key = class_basename($key);
         }
 
         return require base_path("{$key}.php");
+    }
+
+    /** @deprecated use Discovery::get() instead. */
+    public static function cache(string $key): array
+    {
+        return self::get($key);
     }
 
     /** @internal */

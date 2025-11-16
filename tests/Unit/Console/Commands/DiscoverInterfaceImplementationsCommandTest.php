@@ -152,17 +152,17 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
         Discovery::config()->vendors = [];
     });
 
-    test("traverse method handles controlled directory without crashing", function (): void {
+    test("collectFiles method handles controlled directory without crashing", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod("traverse");
-        $traverseMethod->setAccessible(true);
+        $collectFilesMethod = $reflection->getMethod("collectFiles");
+        $collectFilesMethod->setAccessible(true);
 
         // Test with tests directory (small and controlled)
         $testDir = dirname(__FILE__);
 
-        expect(function () use ($command, $traverseMethod, $testDir): void {
-            $traverseMethod->invoke($command, $testDir);
+        expect(function () use ($command, $collectFilesMethod, $testDir): void {
+            $collectFilesMethod->invoke($command, $testDir);
         })->not->toThrow(Exception::class);
     });
 
@@ -173,11 +173,11 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
             ->and($command->getDescription())->toBe("Generate a list of classes implementing Tenant interfaces");
     });
 
-    test("traverse method handles parsing errors gracefully", function (): void {
+    test("processFile method handles parsing errors gracefully", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod("traverse");
-        $traverseMethod->setAccessible(true);
+        $processFileMethod = $reflection->getMethod("processFile");
+        $processFileMethod->setAccessible(true);
 
         // Create a temporary directory with an invalid PHP file
         $testDir = sys_get_temp_dir() . "/discovery-traverse-test";
@@ -186,8 +186,10 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
         }
         file_put_contents($testDir . "/invalid.php", "<?php invalid syntax here");
 
-        expect(function () use ($command, $traverseMethod, $testDir): void {
-            $traverseMethod->invoke($command, $testDir);
+        $file = new SplFileInfo($testDir . "/invalid.php");
+
+        expect(function () use ($command, $processFileMethod, $file): void {
+            $processFileMethod->invoke($command, $file);
         })->not->toThrow(Exception::class);
 
         // Cleanup
@@ -195,11 +197,11 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
         rmdir($testDir);
     });
 
-    test("traverse method skips non-php files", function (): void {
+    test("collectFiles method skips non-php files", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod("traverse");
-        $traverseMethod->setAccessible(true);
+        $collectFilesMethod = $reflection->getMethod("collectFiles");
+        $collectFilesMethod->setAccessible(true);
 
         // Create a temporary directory with a non-PHP file
         $testDir = sys_get_temp_dir() . "/discovery-traverse-test2";
@@ -208,20 +210,19 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
         }
         file_put_contents($testDir . "/test.txt", "not php content");
 
-        expect(function () use ($command, $traverseMethod, $testDir): void {
-            $traverseMethod->invoke($command, $testDir);
-        })->not->toThrow(Exception::class);
+        $files = $collectFilesMethod->invoke($command, $testDir);
+        expect($files)->toBeArray()->toBeEmpty();
 
         // Cleanup
         unlink($testDir . "/test.txt");
         rmdir($testDir);
     });
 
-    test("traverse method handles empty files", function (): void {
+    test("processFile method handles empty files", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod("traverse");
-        $traverseMethod->setAccessible(true);
+        $processFileMethod = $reflection->getMethod("processFile");
+        $processFileMethod->setAccessible(true);
 
         // Create a temporary directory with an empty PHP file
         $testDir = sys_get_temp_dir() . "/discovery-traverse-test3";
@@ -230,8 +231,10 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
         }
         file_put_contents($testDir . "/empty.php", "");
 
-        expect(function () use ($command, $traverseMethod, $testDir): void {
-            $traverseMethod->invoke($command, $testDir);
+        $file = new SplFileInfo($testDir . "/empty.php");
+
+        expect(function () use ($command, $processFileMethod, $file): void {
+            $processFileMethod->invoke($command, $file);
         })->not->toThrow(Exception::class);
 
         // Cleanup
@@ -239,11 +242,11 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
         rmdir($testDir);
     });
 
-    test("traverse method handles null AST from parser", function (): void {
+    test("processFile method handles null AST from parser", function (): void {
         $command = new DiscoverInterfaceImplementationsCommand;
         $reflection = new ReflectionClass($command);
-        $traverseMethod = $reflection->getMethod("traverse");
-        $traverseMethod->setAccessible(true);
+        $processFileMethod = $reflection->getMethod("processFile");
+        $processFileMethod->setAccessible(true);
 
         // Create a temporary directory with minimal PHP file that might return null AST
         $testDir = sys_get_temp_dir() . "/discovery-traverse-test4";
@@ -252,8 +255,10 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
         }
         file_put_contents($testDir . "/minimal.php", "<?php");
 
-        expect(function () use ($command, $traverseMethod, $testDir): void {
-            $traverseMethod->invoke($command, $testDir);
+        $file = new SplFileInfo($testDir . "/minimal.php");
+
+        expect(function () use ($command, $processFileMethod, $file): void {
+            $processFileMethod->invoke($command, $file);
         })->not->toThrow(Exception::class);
 
         // Cleanup

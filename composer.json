@@ -24,6 +24,7 @@
         "encoredigitalgroup/stdlib": "^2",
         "illuminate/console": "^11|^12",
         "illuminate/support": "^11|^12",
+        "laravel/prompts": "^0.3.7",
         "nikic/php-parser": "^5.4",
         "phpgenesis/logger": "^1.0"
     },

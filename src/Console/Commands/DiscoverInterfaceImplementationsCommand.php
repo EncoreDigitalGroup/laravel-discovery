@@ -23,6 +23,8 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 
+use function Laravel\Prompts\progress;
+
 /** @internal */
 class DiscoverInterfaceImplementationsCommand extends Command
 {
@@ -33,6 +35,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
     public function handle(): void
     {
+        $startedAt = Date::now();
         $this->newLine();
         $this->info("Discovering...");
 
@@ -46,7 +49,9 @@ class DiscoverInterfaceImplementationsCommand extends Command
         // Single-pass discovery: parse each file once and check all interfaces
         $this->discoverAll($interfaces);
 
-        $this->info("Discovery Complete!");
+        $duration = $startedAt->diff(Date::now());
+
+        $this->info("Discovery completed in " . $duration->forHumans());
         $this->newLine(2);
     }
 
@@ -58,7 +63,6 @@ class DiscoverInterfaceImplementationsCommand extends Command
             }
         }
 
-        $startedAt = Date::now();
         $this->info("Discovering " . count($interfaces) . " interface(s).");
 
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
@@ -68,15 +72,28 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         $this->traverser->addVisitor($finder);
 
+        // Collect all files from all directories first
+        $allFiles = [];
         foreach ($this->directories() as $directory) {
             if (!is_dir($directory)) {
                 continue;
             }
 
-            $this->traverse($directory);
+            $allFiles = array_merge($allFiles, $this->collectFiles($directory));
         }
 
-        // Write cache files for each interface
+        $totalFiles = count($allFiles);
+
+        if ($totalFiles === 0) {
+            $this->warn("No PHP files found to scan.");
+        } else {
+            $this->info("Scanning {$totalFiles} files...");
+
+            // Process files with progress bar
+            $this->processFilesWithProgress($allFiles);
+        }
+
+        // Write cache files for each interface (even if empty)
         $cachePath = Discovery::config()->cachePath;
         if (!is_dir($cachePath)) {
             mkdir($cachePath, 0755, true);
@@ -87,9 +104,6 @@ class DiscoverInterfaceImplementationsCommand extends Command
             $fileContent = "<?php\n\nreturn " . var_export($implementingClasses, true) . ";\n";
             file_put_contents($cachePath . "/{$interface}.php", $fileContent);
         }
-        $duration = $startedAt->diff(Date::now());
-
-        $this->info("Discovery completed in " . $duration->forHumans());
     }
 
     private function directories(): array
@@ -120,25 +134,31 @@ class DiscoverInterfaceImplementationsCommand extends Command
         return $directories;
     }
 
-    private function traverse(string $directory): void
+    private function collectFiles(string $directory): array
     {
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
         $files = [];
 
-        // Collect all PHP files first
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === "php") {
                 $files[] = $file;
             }
         }
 
-        // Process files in batches using Fibers for concurrency
+        return $files;
+    }
+
+    private function processFilesWithProgress(array $files): void
+    {
         $batchSize = Discovery::config()->concurrencyBatchSize;
         $batches = array_chunk($files, $batchSize);
 
-        foreach ($batches as $batch) {
-            $this->processBatchConcurrently($batch);
-        }
+        progress(
+            label: 'Processing files',
+            steps: $batches,
+            callback: fn ($batch) => $this->processBatchConcurrently($batch),
+            hint: "Batch size: {$batchSize}"
+        );
     }
 
     private function processBatchConcurrently(array $files): void

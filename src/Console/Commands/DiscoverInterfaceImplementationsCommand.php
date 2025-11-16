@@ -25,6 +25,7 @@ use RecursiveIteratorIterator;
 use SplFileInfo;
 
 use function Laravel\Prompts\progress;
+use Laravel\Prompts\Progress;
 
 /** @internal */
 class DiscoverInterfaceImplementationsCommand extends Command
@@ -102,7 +103,6 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         $this->traverser->addVisitor($finder);
 
-        // Collect all files from all directories first
         $allFiles = [];
         foreach ($this->directories() as $directory) {
             if (!is_dir($directory)) {
@@ -119,11 +119,9 @@ class DiscoverInterfaceImplementationsCommand extends Command
         } else {
             $this->info("Scanning " . Number::format($totalFiles) . " files...");
 
-            // Process files with progress bar
             $this->processFilesWithProgress($allFiles);
         }
 
-        // Write cache files for each interface (even if empty)
         $cachePath = Discovery::config()->cachePath;
         if (!is_dir($cachePath)) {
             mkdir($cachePath, 0755, true);
@@ -171,7 +169,6 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === "php") {
-                // Skip excluded paths
                 if ($this->isPathExcluded($file->getPathname())) {
                     continue;
                 }
@@ -204,11 +201,10 @@ class DiscoverInterfaceImplementationsCommand extends Command
             label: 'Processing files',
             steps: $files,
             callback: fn($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize),
-            hint: "Batch size: {$batchSize}"
         );
     }
 
-    private function processFileWithProgress(SplFileInfo $file, $progress, int $batchSize): void
+    private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize): void
     {
         static $batch = [];
         static $totalProcessed = 0;
@@ -216,7 +212,6 @@ class DiscoverInterfaceImplementationsCommand extends Command
         $batch[] = $file;
         $totalProcessed++;
 
-        // Process batch when it reaches the batch size or it's the last file
         if (count($batch) >= $batchSize || $totalProcessed === $progress->total) {
             $this->processBatchConcurrently($batch);
             $batch = [];
@@ -227,14 +222,12 @@ class DiscoverInterfaceImplementationsCommand extends Command
     {
         $fibers = [];
 
-        // Create a Fiber for each file in the batch
         foreach ($files as $file) {
             $fibers[] = new Fiber(function () use ($file) {
                 $this->processFile($file);
             });
         }
 
-        // Start all fibers
         foreach ($fibers as $fiber) {
             $fiber->start();
         }

@@ -129,8 +129,8 @@ describe("DiscoveryConfig", function (): void {
         expect(Discovery::config()->interfaces)->not->toContain("", "FakeInterface");
     });
 
-    test("constructor sets default concurrency batch size to 50", function (): void {
-        expect(Discovery::refresh()->concurrencyBatchSize)->toBe(50);
+    test("constructor sets default concurrency batch size to 1000", function (): void {
+        expect(Discovery::refresh()->concurrencyBatchSize)->toBe(1000);
     });
 
     test("setConcurrencyBatchSize updates batch size", function (): void {

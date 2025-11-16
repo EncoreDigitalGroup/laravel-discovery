@@ -72,17 +72,28 @@ class InterfaceImplementorFinder extends NodeVisitorAbstract
             throw new RuntimeException("Interface Names Cannot Be Empty");
         }
 
-        if (isset($node->implements)) {
-            foreach ($node->implements as $implement) {
-                $implementedInterface = $implement->toString();
+        if (!isset($node->implements)) {
+            return;
+        }
 
-                // Check against all configured interfaces
-                foreach ($this->interfaceNames as $targetInterface) {
-                    if ($implementedInterface === $targetInterface || str_ends_with($implementedInterface, "\\{$targetInterface}")) {
-                        $this->implementingClasses[$targetInterface][] = $className;
-                    }
-                }
+        foreach ($node->implements as $implement) {
+            $implementedInterface = $implement->toString();
+            $this->checkInterfaceMatch($implementedInterface, $className);
+        }
+    }
+
+    private function checkInterfaceMatch(string $implementedInterface, string $className): void
+    {
+        foreach ($this->interfaceNames as $targetInterface) {
+            if ($this->interfaceMatches($implementedInterface, $targetInterface)) {
+                $this->implementingClasses[$targetInterface][] = $className;
             }
         }
+    }
+
+    private function interfaceMatches(string $implementedInterface, string $targetInterface): bool
+    {
+        return $implementedInterface === $targetInterface
+            || str_ends_with($implementedInterface, "\\{$targetInterface}");
     }
 }

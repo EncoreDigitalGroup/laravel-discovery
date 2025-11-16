@@ -64,7 +64,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
             }
         }
 
-        $this->info("Discovering " . Number::forHumans(count($interfaces)) . " interface(s).");
+        $this->info("Discovering " . Number::format(count($interfaces)) . " interface(s).");
 
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
@@ -88,7 +88,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
         if ($totalFiles === 0) {
             $this->warn("No PHP files found to scan.");
         } else {
-            $this->info("Scanning {$totalFiles} files...");
+            $this->info("Scanning " . Number::format($totalFiles) . " files...");
 
             // Process files with progress bar
             $this->processFilesWithProgress($allFiles);

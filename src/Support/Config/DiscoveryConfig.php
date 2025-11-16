@@ -11,7 +11,7 @@ class DiscoveryConfig
     public string $cachePath;
     public array $vendors = [];
     public array $interfaces = [];
-    public int $concurrencyBatchSize = 50;
+    public int $concurrencyBatchSize = 1000;
     private bool $searchVendors = false;
     private bool $searchAllVendors = false;
 

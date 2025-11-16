@@ -34,6 +34,35 @@ class DiscoverInterfaceImplementationsCommand extends Command
     private Parser $parser;
     private NodeTraverser $traverser;
 
+    private const array EXCLUDED_DIR_PATTERNS = [
+        '*/tests/*',
+        '*/test/*',
+        '*/Test/*',
+        '*/Tests/*',
+        '*/docs/*',
+        '*/doc/*',
+        '*/documentation/*',
+        '*/examples/*',
+        '*/example/*',
+        '*/fixtures/*',
+        '*/stubs/*',
+        '*/stub/*',
+        '*/resources/views/*',
+        '*/resources/lang/*',
+        '*/resources/css/*',
+        '*/resources/js/*',
+        '*/public/*',
+        '*/storage/*',
+        '*/node_modules/*',
+        '*/assets/*',
+        '*/build/*',
+        '*/dist/*',
+        '*/vendor/bin/*',
+        '*/database/migrations/*',
+        '*/database/seeds/*',
+        '*/database/factories/*',
+    ];
+
     public function handle(): void
     {
         $startedAt = Date::now();
@@ -142,11 +171,29 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         foreach ($iterator as $file) {
             if ($file->isFile() && $file->getExtension() === "php") {
+                // Skip excluded paths
+                if ($this->isPathExcluded($file->getPathname())) {
+                    continue;
+                }
+
                 $files[] = $file;
             }
         }
 
         return $files;
+    }
+
+    private function isPathExcluded(string $path): bool
+    {
+        $normalizedPath = str_replace('\\', '/', $path);
+
+        foreach (self::EXCLUDED_DIR_PATTERNS as $pattern) {
+            if (fnmatch($pattern, $normalizedPath, FNM_PATHNAME)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function processFilesWithProgress(array $files): void

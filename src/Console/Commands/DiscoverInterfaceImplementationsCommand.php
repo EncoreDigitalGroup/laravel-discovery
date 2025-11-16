@@ -9,6 +9,7 @@ namespace EncoreDigitalGroup\LaravelDiscovery\Console\Commands;
 
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 use EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
+use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
 use Fiber;
 use Illuminate\Console\Command;
@@ -63,7 +64,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
             }
         }
 
-        $this->info("Discovering " . count($interfaces) . " interface(s).");
+        $this->info("Discovering " . Number::forHumans(count($interfaces)) . " interface(s).");
 
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
@@ -156,7 +157,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
         progress(
             label: 'Processing files',
             steps: $batches,
-            callback: fn ($batch) => $this->processBatchConcurrently($batch),
+            callback: fn($batch) => $this->processBatchConcurrently($batch),
             hint: "Batch size: {$batchSize}"
         );
     }

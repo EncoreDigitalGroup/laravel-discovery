@@ -68,7 +68,7 @@ class InterfaceImplementorFinder extends NodeVisitorAbstract
 
     private function nodeImplements(Node\Stmt\Class_ $node, string $className): void
     {
-        if (empty($this->interfaceNames)) {
+        if ($this->interfaceNames === []) {
             throw new RuntimeException("Interface Names Cannot Be Empty");
         }
 

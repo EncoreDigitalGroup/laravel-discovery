@@ -51,7 +51,7 @@ describe("InterfaceImplementorFinder", function (): void {
 
         $result = $this->finder->enterNode($classNode);
         expect($result)->toBeNull()
-            ->and($this->finder->getImplementingClassesForInterface('TestInterface'))
+            ->and($this->finder->getImplementingClassesForInterface("TestInterface"))
             ->toContain('App\Test\TestClass');
 
         // Test fully qualified interface
@@ -61,7 +61,7 @@ describe("InterfaceImplementorFinder", function (): void {
         $classNode2->implements = [$interfaceName2];
 
         $this->finder->enterNode($classNode2);
-        expect($this->finder->getImplementingClassesForInterface('TestInterface'))->toContain('App\Test\TestClass2');
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toContain('App\Test\TestClass2');
     });
 
     test("enter node ignores non-matching classes", function (): void {
@@ -77,17 +77,17 @@ describe("InterfaceImplementorFinder", function (): void {
         $classNode1->implements = [new Name("DifferentInterface")];
 
         $this->finder->enterNode($classNode1);
-        expect($this->finder->getImplementingClassesForInterface('TestInterface'))->toEqual([]);
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toEqual([]);
 
         // Test class without implements
         $classNode2 = new Class_(new Identifier("TestClass2"));
         $this->finder->enterNode($classNode2);
-        expect($this->finder->getImplementingClassesForInterface('TestInterface'))->toEqual([]);
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toEqual([]);
 
         // Test anonymous class
         $classNode3 = new Class_(null);
         $this->finder->enterNode($classNode3);
-        expect($this->finder->getImplementingClassesForInterface('TestInterface'))->toEqual([]);
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toEqual([]);
     });
 
     test("enter node processes multiple interfaces on class", function (): void {
@@ -108,7 +108,7 @@ describe("InterfaceImplementorFinder", function (): void {
         $result = $this->finder->enterNode($classNode);
 
         expect($result)->toBeNull();
-        $implementations = $this->finder->getImplementingClassesForInterface('TestInterface');
+        $implementations = $this->finder->getImplementingClassesForInterface("TestInterface");
         expect($implementations)->toContain('App\Test\TestClass');
     });
 

@@ -36,32 +36,32 @@ class DiscoverInterfaceImplementationsCommand extends Command
     private NodeTraverser $traverser;
 
     private const array EXCLUDED_DIR_PATTERNS = [
-        '*/tests/*',
-        '*/test/*',
-        '*/Test/*',
-        '*/Tests/*',
-        '*/docs/*',
-        '*/doc/*',
-        '*/documentation/*',
-        '*/examples/*',
-        '*/example/*',
-        '*/fixtures/*',
-        '*/stubs/*',
-        '*/stub/*',
-        '*/resources/views/*',
-        '*/resources/lang/*',
-        '*/resources/css/*',
-        '*/resources/js/*',
-        '*/public/*',
-        '*/storage/*',
-        '*/node_modules/*',
-        '*/assets/*',
-        '*/build/*',
-        '*/dist/*',
-        '*/vendor/bin/*',
-        '*/database/migrations/*',
-        '*/database/seeds/*',
-        '*/database/factories/*',
+        "*/tests/*",
+        "*/test/*",
+        "*/Test/*",
+        "*/Tests/*",
+        "*/docs/*",
+        "*/doc/*",
+        "*/documentation/*",
+        "*/examples/*",
+        "*/example/*",
+        "*/fixtures/*",
+        "*/stubs/*",
+        "*/stub/*",
+        "*/resources/views/*",
+        "*/resources/lang/*",
+        "*/resources/css/*",
+        "*/resources/js/*",
+        "*/public/*",
+        "*/storage/*",
+        "*/node_modules/*",
+        "*/assets/*",
+        "*/build/*",
+        "*/dist/*",
+        "*/vendor/bin/*",
+        "*/database/migrations/*",
+        "*/database/seeds/*",
+        "*/database/factories/*",
     ];
 
     public function handle(): void
@@ -72,7 +72,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         $interfaces = Discovery::config()->interfaces;
 
-        if (empty($interfaces)) {
+        if ($interfaces === []) {
             $this->warn("No interfaces configured for discovery.");
             return;
         }
@@ -182,7 +182,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
     private function isPathExcluded(string $path): bool
     {
-        $normalizedPath = str_replace('\\', '/', $path);
+        $normalizedPath = str_replace('\\', "/", $path);
 
         foreach (self::EXCLUDED_DIR_PATTERNS as $pattern) {
             if (fnmatch($pattern, $normalizedPath, FNM_PATHNAME)) {
@@ -198,7 +198,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
         $batchSize = Discovery::config()->concurrencyBatchSize;
 
         progress(
-            label: 'Processing files',
+            label: "Processing files",
             steps: $files,
             callback: fn($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize),
         );
@@ -223,7 +223,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
         $fibers = [];
 
         foreach ($files as $file) {
-            $fibers[] = new Fiber(function () use ($file) {
+            $fibers[] = new Fiber(function () use ($file): void {
                 $this->processFile($file);
             });
         }

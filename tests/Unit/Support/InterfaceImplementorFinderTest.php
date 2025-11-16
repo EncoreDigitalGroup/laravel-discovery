@@ -51,7 +51,7 @@ describe("InterfaceImplementorFinder", function (): void {
 
         $result = $this->finder->enterNode($classNode);
         expect($result)->toBeNull()
-            ->and($this->finder->getImplementingClasses())
+            ->and($this->finder->getImplementingClassesForInterface("TestInterface"))
             ->toContain('App\Test\TestClass');
 
         // Test fully qualified interface
@@ -61,7 +61,7 @@ describe("InterfaceImplementorFinder", function (): void {
         $classNode2->implements = [$interfaceName2];
 
         $this->finder->enterNode($classNode2);
-        expect($this->finder->getImplementingClasses())->toContain('App\Test\TestClass2');
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toContain('App\Test\TestClass2');
     });
 
     test("enter node ignores non-matching classes", function (): void {
@@ -77,17 +77,17 @@ describe("InterfaceImplementorFinder", function (): void {
         $classNode1->implements = [new Name("DifferentInterface")];
 
         $this->finder->enterNode($classNode1);
-        expect($this->finder->getImplementingClasses())->toEqual([]);
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toEqual([]);
 
         // Test class without implements
         $classNode2 = new Class_(new Identifier("TestClass2"));
         $this->finder->enterNode($classNode2);
-        expect($this->finder->getImplementingClasses())->toEqual([]);
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toEqual([]);
 
         // Test anonymous class
         $classNode3 = new Class_(null);
         $this->finder->enterNode($classNode3);
-        expect($this->finder->getImplementingClasses())->toEqual([]);
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toEqual([]);
     });
 
     test("enter node processes multiple interfaces on class", function (): void {
@@ -108,7 +108,7 @@ describe("InterfaceImplementorFinder", function (): void {
         $result = $this->finder->enterNode($classNode);
 
         expect($result)->toBeNull();
-        $implementations = $this->finder->getImplementingClasses();
+        $implementations = $this->finder->getImplementingClassesForInterface("TestInterface");
         expect($implementations)->toContain('App\Test\TestClass');
     });
 
@@ -120,8 +120,11 @@ describe("InterfaceImplementorFinder", function (): void {
         expect($result)->toBeNull();
     });
 
-    test("node implements throws exception when interface name empty", function (): void {
-        $this->finder->setInterfaceName("");
+    test("node implements throws exception when interface names empty", function (): void {
+        // Don't set any interface names - leave array empty
+        $namespaceName = new Name('App\Test');
+        $namespaceNode = new Namespace_($namespaceName);
+        $this->finder->enterNode($namespaceNode);
 
         $className = new Identifier("TestClass");
         $interfaceName = new Name("TestInterface");
@@ -129,7 +132,7 @@ describe("InterfaceImplementorFinder", function (): void {
         $classNode->implements = [$interfaceName];
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage("Interface Name Property Cannot Be Empty String");
+        $this->expectExceptionMessage("Interface Names Cannot Be Empty");
 
         $this->finder->enterNode($classNode);
     });

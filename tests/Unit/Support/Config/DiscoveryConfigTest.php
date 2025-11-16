@@ -128,4 +128,33 @@ describe("DiscoveryConfig", function (): void {
 
         expect(Discovery::config()->interfaces)->not->toContain("", "FakeInterface");
     });
+
+    test("constructor sets default concurrency batch size to 1000", function (): void {
+        expect(Discovery::refresh()->concurrencyBatchSize)->toBe(1000);
+    });
+
+    test("setConcurrencyBatchSize updates batch size", function (): void {
+        $result = Discovery::refresh()->setConcurrencyBatchSize(100);
+
+        expect($result)->toBe(Discovery::config())
+            ->and(Discovery::config()->concurrencyBatchSize)->toBe(100);
+    });
+
+    test("setConcurrencyBatchSize enforces minimum value of 1", function (): void {
+        Discovery::refresh()->setConcurrencyBatchSize(0);
+        expect(Discovery::config()->concurrencyBatchSize)->toBe(1);
+
+        Discovery::refresh()->setConcurrencyBatchSize(-10);
+        expect(Discovery::config()->concurrencyBatchSize)->toBe(1);
+    });
+
+    test("setConcurrencyBatchSize supports method chaining", function (): void {
+        $result = Discovery::refresh()
+            ->setConcurrencyBatchSize(25)
+            ->addInterface(TestInterface::class);
+
+        expect($result)->toBe(Discovery::config())
+            ->and(Discovery::config()->concurrencyBatchSize)->toBe(25)
+            ->and(Discovery::config()->interfaces)->toContain("TestInterface");
+    });
 });

@@ -7,7 +7,6 @@
 
 namespace EncoreDigitalGroup\LaravelDiscovery\Support;
 
-use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
 use PhpParser\Node;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
@@ -19,11 +18,25 @@ class InterfaceImplementorFinder extends NodeVisitorAbstract
 {
     private array $implementingClasses = [];
     private string $currentNamespace = "";
-    private string $interfaceName = "";
+    private array $interfaceNames = [];
 
+    /**
+     * @deprecated Use setInterfaceNames() instead for multi-interface discovery
+     */
     public function setInterfaceName(string $interfaceName): void
     {
-        $this->interfaceName = $interfaceName;
+        $this->interfaceNames = [$interfaceName];
+    }
+
+    public function setInterfaceNames(array $interfaceNames): void
+    {
+        $this->interfaceNames = $interfaceNames;
+        // Initialize the implementing classes array for each interface
+        foreach ($interfaceNames as $interfaceName) {
+            if (!isset($this->implementingClasses[$interfaceName])) {
+                $this->implementingClasses[$interfaceName] = [];
+            }
+        }
     }
 
     public function enterNode(Node $node): null
@@ -47,19 +60,39 @@ class InterfaceImplementorFinder extends NodeVisitorAbstract
         return $this->implementingClasses;
     }
 
+    public function getImplementingClassesForInterface(string $interfaceName): array
+    {
+        return $this->implementingClasses[$interfaceName] ?? [];
+    }
+
     private function nodeImplements(Node\Stmt\Class_ $node, string $className): void
     {
-        if ($this->interfaceName == Str::empty()) {
-            throw new RuntimeException("Interface Name Property Cannot Be Empty String");
+        if ($this->interfaceNames === []) {
+            throw new RuntimeException("Interface Names Cannot Be Empty");
         }
 
-        if (isset($node->implements)) {
-            foreach ($node->implements as $implement) {
-                $interfaceName = $implement->toString();
-                if ($interfaceName === $this->interfaceName || str_ends_with($interfaceName, "\\{$this->interfaceName}")) {
-                    $this->implementingClasses[] = $className;
-                }
+        if (!isset($node->implements)) {
+            return;
+        }
+
+        foreach ($node->implements as $implement) {
+            $implementedInterface = $implement->toString();
+            $this->checkInterfaceMatch($implementedInterface, $className);
+        }
+    }
+
+    private function checkInterfaceMatch(string $implementedInterface, string $className): void
+    {
+        foreach ($this->interfaceNames as $targetInterface) {
+            if ($this->interfaceMatches($implementedInterface, $targetInterface)) {
+                $this->implementingClasses[$targetInterface][] = $className;
             }
         }
+    }
+
+    private function interfaceMatches(string $implementedInterface, string $targetInterface): bool
+    {
+        return $implementedInterface === $targetInterface
+            || str_ends_with($implementedInterface, "\\{$targetInterface}");
     }
 }

@@ -7,7 +7,6 @@
 
 namespace EncoreDigitalGroup\LaravelDiscovery\Support;
 
-use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
 use PhpParser\Node;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;

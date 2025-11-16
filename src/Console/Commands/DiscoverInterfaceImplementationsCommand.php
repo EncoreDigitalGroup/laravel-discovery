@@ -15,6 +15,10 @@ use Fiber;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
 use InvalidArgumentException;
+
+use function Laravel\Prompts\progress;
+
+use Laravel\Prompts\Progress;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
@@ -24,17 +28,9 @@ use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
 
-use function Laravel\Prompts\progress;
-use Laravel\Prompts\Progress;
-
 /** @internal */
 class DiscoverInterfaceImplementationsCommand extends Command
 {
-    protected $signature = "discovery:run";
-    protected $description = "Generate a list of classes implementing Tenant interfaces";
-    private Parser $parser;
-    private NodeTraverser $traverser;
-
     private const array EXCLUDED_DIR_PATTERNS = [
         "*/tests/*",
         "*/test/*",
@@ -64,6 +60,11 @@ class DiscoverInterfaceImplementationsCommand extends Command
         "*/database/factories/*",
     ];
 
+    protected $signature = "discovery:run";
+    protected $description = "Generate a list of classes implementing Tenant interfaces";
+    private Parser $parser;
+    private NodeTraverser $traverser;
+
     public function handle(): void
     {
         $startedAt = Date::now();
@@ -74,6 +75,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         if ($interfaces === []) {
             $this->warn("No interfaces configured for discovery.");
+
             return;
         }
 
@@ -200,7 +202,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
         progress(
             label: "Processing files",
             steps: $files,
-            callback: fn($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize),
+            callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize),
         );
     }
 

@@ -152,14 +152,28 @@ class DiscoverInterfaceImplementationsCommand extends Command
     private function processFilesWithProgress(array $files): void
     {
         $batchSize = Discovery::config()->concurrencyBatchSize;
-        $batches = array_chunk($files, $batchSize);
 
         progress(
             label: 'Processing files',
-            steps: $batches,
-            callback: fn($batch) => $this->processBatchConcurrently($batch),
+            steps: $files,
+            callback: fn($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize),
             hint: "Batch size: {$batchSize}"
         );
+    }
+
+    private function processFileWithProgress(SplFileInfo $file, $progress, int $batchSize): void
+    {
+        static $batch = [];
+        static $totalProcessed = 0;
+
+        $batch[] = $file;
+        $totalProcessed++;
+
+        // Process batch when it reaches the batch size or it's the last file
+        if (count($batch) >= $batchSize || $totalProcessed === $progress->total) {
+            $this->processBatchConcurrently($batch);
+            $batch = [];
+        }
     }
 
     private function processBatchConcurrently(array $files): void

@@ -157,7 +157,7 @@ describe("InterfaceImplementorFinder", function (): void {
     });
 
     test("setInterfaceNames method initializes implementing classes array", function (): void {
-        $interfaces = ['Interface1', 'Interface2', 'Interface3'];
+        $interfaces = ["Interface1", "Interface2", "Interface3"];
         $this->finder->setInterfaceNames($interfaces);
 
         foreach ($interfaces as $interface) {

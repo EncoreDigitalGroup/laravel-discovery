@@ -25,14 +25,17 @@ readonly class SystemResourceProfile
     public function getOptimalBatchSize(): int
     {
         $combinedScore = ($this->cpuScore + $this->memoryScore) / 2;
-
         if ($combinedScore >= 0.8) {
             return 2000;
-        } elseif ($combinedScore >= 0.5) {
+        }
+        if ($combinedScore >= 0.5) {
             return 1000;
-        } elseif ($combinedScore >= 0.3) {
+        }
+
+        if ($combinedScore >= 0.3) {
             return 500;
-        } else {
+        }
+        else {
             return 100;
         }
     }
@@ -46,7 +49,7 @@ readonly class SystemResourceProfile
         }
 
         // macOS optimization: Use more aggressive concurrency
-        if (PHP_OS_FAMILY === 'Darwin') {
+        if (PHP_OS_FAMILY === "Darwin") {
             return min($this->cpuCores * 2, $baseConcurrency + 4);
         }
 

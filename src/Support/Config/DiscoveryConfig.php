@@ -89,7 +89,7 @@ class DiscoveryConfig
 
     public function getResourceProfile(): SystemResourceProfile
     {
-        if(!isset($this->resourceProfile)) {
+        if(!$this->resourceProfile instanceof \EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile) {
             $this->resourceProfile = SystemResourceDetector::make();
         }
 

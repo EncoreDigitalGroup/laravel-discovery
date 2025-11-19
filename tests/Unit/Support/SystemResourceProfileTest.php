@@ -2,8 +2,8 @@
 
 use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 
-describe('SystemResourceProfile', function () {
-    test('constructor sets all properties correctly', function () {
+describe("SystemResourceProfile", function (): void {
+    test("constructor sets all properties correctly", function (): void {
         $profile = new SystemResourceProfile(
             cpuCores: 8,
             cpuScore: 1.0,
@@ -27,7 +27,7 @@ describe('SystemResourceProfile', function () {
             ->and($profile->fiberSupport)->toBeTrue();
     });
 
-    test('getOptimalBatchSize returns correct batch sizes for different combined scores', function () {
+    test("getOptimalBatchSize returns correct batch sizes for different combined scores", function (): void {
         // High performance system
         $highPerformanceProfile = new SystemResourceProfile(
             cpuCores: 8,
@@ -104,7 +104,7 @@ describe('SystemResourceProfile', function () {
         expect($veryLowPerformanceProfile->getOptimalBatchSize())->toBe(100);
     });
 
-    test('getOptimalConcurrency returns correct concurrency for different systems', function () {
+    test("getOptimalConcurrency returns correct concurrency for different systems", function (): void {
         // High memory system
         $highMemoryProfile = new SystemResourceProfile(
             cpuCores: 8,
@@ -151,7 +151,7 @@ describe('SystemResourceProfile', function () {
         expect($singleCoreProfile->getOptimalConcurrency())->toBe(1); // max(1, 1-1) = 1
     });
 
-    test('shouldUseProgressiveScanning returns true for low memory systems', function () {
+    test("shouldUseProgressiveScanning returns true for low memory systems", function (): void {
         $lowMemoryProfile = new SystemResourceProfile(
             cpuCores: 8,
             cpuScore: 1.0,
@@ -167,7 +167,7 @@ describe('SystemResourceProfile', function () {
         expect($lowMemoryProfile->shouldUseProgressiveScanning())->toBeTrue();
     });
 
-    test('shouldUseProgressiveScanning returns false for high memory systems', function () {
+    test("shouldUseProgressiveScanning returns false for high memory systems", function (): void {
         $highMemoryProfile = new SystemResourceProfile(
             cpuCores: 8,
             cpuScore: 1.0,
@@ -184,7 +184,7 @@ describe('SystemResourceProfile', function () {
     });
 
     // Test macOS optimization path if we can mock PHP_OS_FAMILY
-    test('getOptimalConcurrency handles macOS optimization when conditions are met', function () {
+    test("getOptimalConcurrency handles macOS optimization when conditions are met", function (): void {
         // We can't easily mock PHP_OS_FAMILY, but we can test the logic
         // by checking if the current system is macOS and expecting the appropriate behavior
 
@@ -202,7 +202,7 @@ describe('SystemResourceProfile', function () {
 
         $concurrency = $macProfile->getOptimalConcurrency();
 
-        if (PHP_OS_FAMILY === 'Darwin') {
+        if (PHP_OS_FAMILY === "Darwin") {
             // On macOS, it should use min(cpuCores * 2, baseConcurrency + 4)
             // baseConcurrency = max(1, cpuCores - 1) = max(1, 3) = 3
             // So it should be min(4 * 2, 3 + 4) = min(8, 7) = 7

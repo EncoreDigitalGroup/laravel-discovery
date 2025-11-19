@@ -62,7 +62,7 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
             mkdir($appPath, 0755, true);
         }
 
-        $testImplFile = $appPath . '/TestImplementation.php';
+        $testImplFile = $appPath . "/TestImplementation.php";
         file_put_contents($testImplFile, '<?php
 
 namespace App;
@@ -115,7 +115,7 @@ class TestImplementation implements TestInterface
             mkdir($appPath, 0755, true);
         }
 
-        $testImplFile = $appPath . '/TestImplementation.php';
+        $testImplFile = $appPath . "/TestImplementation.php";
         file_put_contents($testImplFile, '<?php
 namespace App;
 use Tests\TestHelpers\TestInterface;
@@ -141,7 +141,7 @@ class TestImplementation implements TestInterface {
             mkdir($appPath, 0755, true);
         }
 
-        $testImplFile = $appPath . '/TestImplementation.php';
+        $testImplFile = $appPath . "/TestImplementation.php";
         file_put_contents($testImplFile, '<?php
 namespace App;
 use Tests\TestHelpers\TestInterface;

@@ -12,7 +12,7 @@ class DiscoveryServiceProvider extends BaseServiceProvider
     public function register(): void
     {
         if ($this->app->runningInConsole() && !$this->isPackageDiscovery()) {
-            $this->app->singleton(DiscoveryService::class, function ($app) {
+            $this->app->singleton(DiscoveryService::class, function ($app): \EncoreDigitalGroup\LaravelDiscovery\Services\DiscoveryService {
                 return new DiscoveryService(Discovery::config());
             });
         }
@@ -20,7 +20,7 @@ class DiscoveryServiceProvider extends BaseServiceProvider
 
     private function isPackageDiscovery(): bool
     {
-        return in_array('package:discover', $_SERVER['argv'] ?? []) && !$this->app->environment('testing');
+        return in_array("package:discover", $_SERVER["argv"] ?? []) && !$this->app->environment("testing");
     }
 
     public function boot(): void

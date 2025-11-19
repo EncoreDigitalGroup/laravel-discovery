@@ -5,8 +5,8 @@ use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use Illuminate\Support\Facades\App;
 
-describe('DiscoveryService', function () {
-    beforeEach(function () {
+describe("DiscoveryService", function (): void {
+    beforeEach(function (): void {
         $this->config = new DiscoveryConfig();
         $this->service = new DiscoveryService($this->config);
 
@@ -16,49 +16,50 @@ describe('DiscoveryService', function () {
         }
     });
 
-    afterEach(function () {
+    afterEach(function (): void {
         // Clean up any cache files
         if (is_dir($this->config->cachePath)) {
-            $files = glob($this->config->cachePath . '/*.php');
+            $files = glob($this->config->cachePath . "/*.php");
             foreach ($files as $file) {
                 unlink($file);
             }
         }
     });
 
-    test('constructor initializes parser and traverser', function () {
+    test("constructor initializes parser and traverser", function (): void {
         $service = new DiscoveryService($this->config);
 
         $reflection = new ReflectionClass($service);
-        $parserProperty = $reflection->getProperty('parser');
+        $parserProperty = $reflection->getProperty("parser");
         $parserProperty->setAccessible(true);
-        $traverserProperty = $reflection->getProperty('traverser');
+
+        $traverserProperty = $reflection->getProperty("traverser");
         $traverserProperty->setAccessible(true);
 
         expect($parserProperty->getValue($service))->toBeInstanceOf(\PhpParser\Parser::class)
             ->and($traverserProperty->getValue($service))->toBeInstanceOf(\PhpParser\NodeTraverser::class);
     });
 
-    test('discoverAll handles empty interface array', function () {
-        expect(function () {
+    test("discoverAll handles empty interface array", function (): void {
+        expect(function (): void {
             $this->service->discoverAll([]);
         })->not->toThrow(Exception::class);
     });
 
-    test('discoverAll processes interfaces without errors', function () {
-        $interfaces = ['TestInterface'];
+    test("discoverAll processes interfaces without errors", function (): void {
+        $interfaces = ["TestInterface"];
 
-        expect(function () use ($interfaces) {
+        expect(function () use ($interfaces): void {
             $this->service->discoverAll($interfaces);
         })->not->toThrow(Exception::class);
     });
 
-    test('collectAllFiles returns empty array when no directories exist', function () {
+    test("collectAllFiles returns empty array when no directories exist", function (): void {
         // Mock app_path to return non-existent directory
-        App::shouldReceive('make')->with('path')->andReturn('/nonexistent/path');
+        App::shouldReceive("make")->with("path")->andReturn("/nonexistent/path");
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('collectAllFiles');
+        $method = $reflection->getMethod("collectAllFiles");
         $method->setAccessible(true);
 
         $files = $method->invoke($this->service);
@@ -66,9 +67,9 @@ describe('DiscoveryService', function () {
         expect($files)->toBe([]);
     });
 
-    test('getDirectories includes app_path by default', function () {
+    test("getDirectories includes app_path by default", function (): void {
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('getDirectories');
+        $method = $reflection->getMethod("getDirectories");
         $method->setAccessible(true);
 
         $directories = $method->invoke($this->service);
@@ -76,16 +77,16 @@ describe('DiscoveryService', function () {
         expect($directories)->toContain(app_path());
     });
 
-    test('getDirectories includes app_modules when directory exists', function () {
+    test("getDirectories includes app_modules when directory exists", function (): void {
         // Create temporary app_modules directory
-        $appModulesPath = base_path('app_modules');
+        $appModulesPath = base_path("app_modules");
         if (!is_dir($appModulesPath)) {
             mkdir($appModulesPath, 0755, true);
             $createdDir = true;
         }
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('getDirectories');
+        $method = $reflection->getMethod("getDirectories");
         $method->setAccessible(true);
 
         $directories = $method->invoke($this->service);
@@ -98,16 +99,16 @@ describe('DiscoveryService', function () {
         }
     });
 
-    test('getDirectories includes app-modules when directory exists', function () {
+    test("getDirectories includes app-modules when directory exists", function (): void {
         // Create temporary app-modules directory
-        $appModulesPath = base_path('app-modules');
+        $appModulesPath = base_path("app-modules");
         if (!is_dir($appModulesPath)) {
             mkdir($appModulesPath, 0755, true);
             $createdDir = true;
         }
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('getDirectories');
+        $method = $reflection->getMethod("getDirectories");
         $method->setAccessible(true);
 
         $directories = $method->invoke($this->service);
@@ -120,47 +121,47 @@ describe('DiscoveryService', function () {
         }
     });
 
-    test('getDirectories includes all vendor when searchAllVendors is enabled', function () {
+    test("getDirectories includes all vendor when searchAllVendors is enabled", function (): void {
         $this->config->searchAllVendors();
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('getDirectories');
+        $method = $reflection->getMethod("getDirectories");
         $method->setAccessible(true);
 
         $directories = $method->invoke($this->service);
 
-        expect($directories)->toContain(base_path('vendor'))
+        expect($directories)->toContain(base_path("vendor"))
             ->and($this->config->shouldSearchVendors())->toBeFalse(); // Should be disabled when searchAllVendors is used
     });
 
-    test('getDirectories includes specific vendors when searchVendors is enabled', function () {
-        $this->config->searchVendors()->addVendor('symfony')->addVendor('laravel');
+    test("getDirectories includes specific vendors when searchVendors is enabled", function (): void {
+        $this->config->searchVendors()->addVendor("symfony")->addVendor("laravel");
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('getDirectories');
+        $method = $reflection->getMethod("getDirectories");
         $method->setAccessible(true);
 
         $directories = $method->invoke($this->service);
 
-        expect($directories)->toContain(base_path('vendor/symfony'))
-            ->and($directories)->toContain(base_path('vendor/laravel'));
+        expect($directories)->toContain(base_path("vendor/symfony"))
+            ->and($directories)->toContain(base_path("vendor/laravel"));
     });
 
-    test('isPathExcluded method exists and can be called', function () {
+    test("isPathExcluded method exists and can be called", function (): void {
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('isPathExcluded');
+        $method = $reflection->getMethod("isPathExcluded");
         $method->setAccessible(true);
 
         // Just verify the method works without asserting specific paths
-        $result = $method->invokeArgs($this->service, ['/some/test/path.php']);
+        $result = $method->invokeArgs($this->service, ["/some/test/path.php"]);
         expect(is_bool($result))->toBeTrue();
     });
 
-    test('shouldUseProgressiveProcessing returns true for Windows', function () {
+    test("shouldUseProgressiveProcessing returns true for Windows", function (): void {
         // Mock PHP_OS_FAMILY for this test would require additional setup
         // Instead, test the logic directly
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('shouldUseProgressiveProcessing');
+        $method = $reflection->getMethod("shouldUseProgressiveProcessing");
         $method->setAccessible(true);
 
         $resourceProfile = new SystemResourceProfile(
@@ -180,7 +181,7 @@ describe('DiscoveryService', function () {
         $result = $method->invoke($this->service, $resourceProfile, $files);
 
         // On Windows or with large file count and low memory, should return true
-        if (PHP_OS_FAMILY === 'Windows') {
+        if (PHP_OS_FAMILY === "Windows") {
             expect($result)->toBeTrue();
         } else {
             // On non-Windows with good resources and small file count, should be false
@@ -188,9 +189,9 @@ describe('DiscoveryService', function () {
         }
     });
 
-    test('shouldUseProgressiveProcessing returns true for large file count with low memory', function () {
+    test("shouldUseProgressiveProcessing returns true for large file count with low memory", function (): void {
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('shouldUseProgressiveProcessing');
+        $method = $reflection->getMethod("shouldUseProgressiveProcessing");
         $method->setAccessible(true);
 
         $lowMemoryProfile = new SystemResourceProfile(
@@ -209,26 +210,26 @@ describe('DiscoveryService', function () {
 
         $result = $method->invoke($this->service, $lowMemoryProfile, $manyFiles);
 
-        if (PHP_OS_FAMILY !== 'Windows') {
+        if (PHP_OS_FAMILY !== "Windows") {
             expect($result)->toBeTrue();
         } else {
             expect($result)->toBeBool();
         }
     });
 
-    test('processFile handles file reading and parsing', function () {
+    test("processFile handles file reading and parsing", function (): void {
         // Create a temporary PHP file
-        $tempFile = tempnam(sys_get_temp_dir(), 'test_php_');
-        $tempFile .= '.php';
+        $tempFile = tempnam(sys_get_temp_dir(), "test_php_");
+        $tempFile .= ".php";
         file_put_contents($tempFile, "<?php\nclass TestClass {}\n");
 
         $splFile = new SplFileInfo($tempFile);
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('processFile');
+        $method = $reflection->getMethod("processFile");
         $method->setAccessible(true);
 
-        expect(function () use ($method, $splFile) {
+        expect(function () use ($method, $splFile): void {
             $method->invoke($this->service, $splFile);
         })->not->toThrow(Exception::class);
 
@@ -236,19 +237,19 @@ describe('DiscoveryService', function () {
         unlink($tempFile);
     });
 
-    test('processFile handles empty file gracefully', function () {
+    test("processFile handles empty file gracefully", function (): void {
         // Create an empty file
-        $tempFile = tempnam(sys_get_temp_dir(), 'empty_php_');
-        $tempFile .= '.php';
-        file_put_contents($tempFile, '');
+        $tempFile = tempnam(sys_get_temp_dir(), "empty_php_");
+        $tempFile .= ".php";
+        file_put_contents($tempFile, "");
 
         $splFile = new SplFileInfo($tempFile);
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('processFile');
+        $method = $reflection->getMethod("processFile");
         $method->setAccessible(true);
 
-        expect(function () use ($method, $splFile) {
+        expect(function () use ($method, $splFile): void {
             $method->invoke($this->service, $splFile);
         })->not->toThrow(Exception::class);
 
@@ -256,19 +257,19 @@ describe('DiscoveryService', function () {
         unlink($tempFile);
     });
 
-    test('processFile handles parsing errors gracefully', function () {
+    test("processFile handles parsing errors gracefully", function (): void {
         // Create a file with invalid PHP syntax
-        $tempFile = tempnam(sys_get_temp_dir(), 'invalid_php_');
-        $tempFile .= '.php';
+        $tempFile = tempnam(sys_get_temp_dir(), "invalid_php_");
+        $tempFile .= ".php";
         file_put_contents($tempFile, "<?php\nclass TestClass {\n// Missing closing brace");
 
         $splFile = new SplFileInfo($tempFile);
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('processFile');
+        $method = $reflection->getMethod("processFile");
         $method->setAccessible(true);
 
-        expect(function () use ($method, $splFile) {
+        expect(function () use ($method, $splFile): void {
             $method->invoke($this->service, $splFile);
         })->not->toThrow(Exception::class);
 
@@ -276,17 +277,17 @@ describe('DiscoveryService', function () {
         unlink($tempFile);
     });
 
-    test('writeCacheFiles creates cache directory and files', function () {
+    test("writeCacheFiles creates cache directory and files", function (): void {
         // Remove cache directory to test creation
         if (is_dir($this->config->cachePath)) {
             rmdir($this->config->cachePath);
         }
 
-        $interfaces = ['TestInterface1', 'TestInterface2'];
+        $interfaces = ["TestInterface1", "TestInterface2"];
         $finder = new \EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder();
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('writeCacheFiles');
+        $method = $reflection->getMethod("writeCacheFiles");
         $method->setAccessible(true);
 
         $method->invoke($this->service, $interfaces, $finder);
@@ -303,30 +304,30 @@ describe('DiscoveryService', function () {
         }
     });
 
-    test('collectFiles filters PHP files only', function () {
+    test("collectFiles filters PHP files only", function (): void {
         // Create temporary directory with mixed files
-        $tempDir = sys_get_temp_dir() . '/discovery_test_' . uniqid();
+        $tempDir = sys_get_temp_dir() . "/discovery_test_" . uniqid();
         mkdir($tempDir, 0755, true);
 
         // Create various files
-        file_put_contents($tempDir . '/test.php', '<?php');
-        file_put_contents($tempDir . '/test.txt', 'text');
-        file_put_contents($tempDir . '/test.js', 'javascript');
+        file_put_contents($tempDir . "/test.php", "<?php");
+        file_put_contents($tempDir . "/test.txt", "text");
+        file_put_contents($tempDir . "/test.js", "javascript");
 
         $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod('collectFiles');
+        $method = $reflection->getMethod("collectFiles");
         $method->setAccessible(true);
 
         $files = $method->invoke($this->service, $tempDir);
 
         expect(count($files))->toBe(1);
         expect($files[0])->toBeInstanceOf(SplFileInfo::class);
-        expect($files[0]->getExtension())->toBe('php');
+        expect($files[0]->getExtension())->toBe("php");
 
         // Clean up
-        unlink($tempDir . '/test.php');
-        unlink($tempDir . '/test.txt');
-        unlink($tempDir . '/test.js');
+        unlink($tempDir . "/test.php");
+        unlink($tempDir . "/test.txt");
+        unlink($tempDir . "/test.js");
         rmdir($tempDir);
     });
 });

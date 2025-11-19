@@ -26,12 +26,12 @@ class SystemResourceDetector
             memoryAvailable: $memoryAvailable,
             memoryScore: $this->calculateMemoryScore($memoryAvailable),
             diskIoScore: $this->calculateDiskIoScore(),
-            opcacheEnabled: function_exists('opcache_get_status') && opcache_get_status() !== false,
-            jitEnabled: function_exists('opcache_get_status') &&
-                       isset(opcache_get_status()['jit']) &&
-                       opcache_get_status()['jit']['enabled'],
-            parallelExtension: extension_loaded('parallel'),
-            fiberSupport: class_exists('Fiber'),
+            opcacheEnabled: function_exists("opcache_get_status") && opcache_get_status() !== false,
+            jitEnabled: function_exists("opcache_get_status") &&
+                       isset(opcache_get_status()["jit"]) &&
+                       opcache_get_status()["jit"]["enabled"],
+            parallelExtension: extension_loaded("parallel"),
+            fiberSupport: class_exists("Fiber"),
         );
     }
 
@@ -52,14 +52,14 @@ class SystemResourceDetector
 
     private function tryEnvironmentVariable(): ?int
     {
-        $processors = getenv('NUMBER_OF_PROCESSORS');
+        $processors = getenv("NUMBER_OF_PROCESSORS");
 
         return ($processors && is_numeric($processors)) ? (int) $processors : null;
     }
 
     private function tryShellCommands(): ?int
     {
-        if (!function_exists('shell_exec') || $this->isWindowsWithoutShell()) {
+        if (!function_exists("shell_exec") || $this->isWindowsWithoutShell()) {
             return null;
         }
 
@@ -68,14 +68,14 @@ class SystemResourceDetector
 
     private function tryLinuxCommand(): ?int
     {
-        $output = shell_exec('nproc 2>/dev/null');
+        $output = shell_exec("nproc 2>/dev/null");
 
         return $this->parseShellOutput($output);
     }
 
     private function tryMacOsCommand(): ?int
     {
-        $output = shell_exec('sysctl -n hw.ncpu 2>/dev/null');
+        $output = shell_exec("sysctl -n hw.ncpu 2>/dev/null");
 
         return $this->parseShellOutput($output);
     }
@@ -93,38 +93,41 @@ class SystemResourceDetector
 
     private function isWindowsWithoutShell(): bool
     {
-        return PHP_OS_FAMILY === 'Windows' && !$this->hasValidShell();
+        return PHP_OS_FAMILY === "Windows" && !$this->hasValidShell();
     }
 
     private function hasValidShell(): bool
     {
-        if (!function_exists('shell_exec')) {
+        if (!function_exists("shell_exec")) {
             return false;
         }
 
         // Test if shell_exec works without causing path errors
-        $test = @shell_exec('echo test 2>nul');
-        return $test !== null && $test !== false && trim($test) === 'test';
+        $test = @shell_exec("echo test 2>nul");
+        return $test !== null && $test !== false && trim($test) === "test";
     }
 
     private function calculateCpuScore(int $cores): float
     {
         if ($cores >= 8) {
             return 1.0;
-        } elseif ($cores >= 4) {
+        }
+        if ($cores >= 4) {
             return 0.8;
-        } elseif ($cores >= 2) {
+        }
+        if ($cores >= 2) {
             return 0.6;
-        } else {
+        }
+        else {
             return 0.3;
         }
     }
 
     private function detectAvailableMemory(): int
     {
-        $memoryLimit = ini_get('memory_limit');
+        $memoryLimit = ini_get("memory_limit");
 
-        if ($memoryLimit === '-1') {
+        if ($memoryLimit === "-1") {
             return 2048 * 1024 * 1024;
         }
 
@@ -138,9 +141,9 @@ class SystemResourceDetector
         $value = (int) substr($memoryLimit, 0, -1);
 
         return match ($unit) {
-            'G' => $value * 1024 * 1024 * 1024,
-            'M' => $value * 1024 * 1024,
-            'K' => $value * 1024,
+            "G" => $value * 1024 * 1024 * 1024,
+            "M" => $value * 1024 * 1024,
+            "K" => $value * 1024,
             default => (int)$memoryLimit,
         };
     }
@@ -148,28 +151,32 @@ class SystemResourceDetector
     private function calculateMemoryScore(int $availableMemory): float
     {
         $memoryInMB = $availableMemory / (1024 * 1024);
-
         if ($memoryInMB >= 2048) {
             return 1.0;
-        } elseif ($memoryInMB >= 1024) {
+        }
+        if ($memoryInMB >= 1024) {
             return 0.8;
-        } elseif ($memoryInMB >= 512) {
+        }
+        if ($memoryInMB >= 512) {
             return 0.6;
-        } elseif ($memoryInMB >= 256) {
+        }
+
+        if ($memoryInMB >= 256) {
             return 0.4;
-        } else {
+        }
+        else {
             return 0.2;
         }
     }
 
     private function calculateDiskIoScore(): float
     {
-        $testFile = tempnam(sys_get_temp_dir(), 'discovery_io_test');
+        $testFile = tempnam(sys_get_temp_dir(), "discovery_io_test");
         if (!$testFile) {
             return 0.5;
         }
 
-        file_put_contents($testFile, str_repeat('test data ', 1000));
+        file_put_contents($testFile, str_repeat("test data ", 1000));
 
         $startTime = microtime(true);
         file_get_contents($testFile);
@@ -178,14 +185,17 @@ class SystemResourceDetector
         unlink($testFile);
 
         $readTime = $endTime - $startTime;
-
         if ($readTime < 0.001) {
             return 1.0;
-        } elseif ($readTime < 0.005) {
+        }
+        if ($readTime < 0.005) {
             return 0.8;
-        } elseif ($readTime < 0.01) {
+        }
+
+        if ($readTime < 0.01) {
             return 0.6;
-        } else {
+        }
+        else {
             return 0.3;
         }
     }

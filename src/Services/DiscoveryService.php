@@ -72,6 +72,7 @@ class DiscoveryService
     {
         $finder = new InterfaceImplementorFinder;
         $finder->setInterfaceNames($interfaces);
+
         $this->traverser->addVisitor($finder);
 
         $allFiles = $this->collectAllFiles();
@@ -175,7 +176,7 @@ class DiscoveryService
 
     private function shouldUseProgressiveProcessing(SystemResourceProfile $resourceProfile, array $files): bool
     {
-        return PHP_OS_FAMILY === 'Windows' ||
+        return PHP_OS_FAMILY === "Windows" ||
                ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000);
     }
 

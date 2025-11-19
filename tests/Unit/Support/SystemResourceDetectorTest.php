@@ -11,7 +11,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("detect returns SystemResourceProfile with correct properties", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $profile = $detector->detect();
 
         expect($profile)->toBeInstanceOf(SystemResourceProfile::class)
@@ -27,7 +27,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("detectCpuCores returns default when environment and shell unavailable", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
 
         // Use reflection to test private method
         $reflection = new ReflectionClass($detector);
@@ -40,7 +40,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("tryEnvironmentVariable handles environment variable correctly", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("tryEnvironmentVariable");
         $method->setAccessible(true);
@@ -52,7 +52,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("parseShellOutput returns null for null input", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("parseShellOutput");
         $method->setAccessible(true);
@@ -61,7 +61,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("parseShellOutput returns null for false input", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("parseShellOutput");
         $method->setAccessible(true);
@@ -70,7 +70,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("parseShellOutput returns integer for numeric string", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("parseShellOutput");
         $method->setAccessible(true);
@@ -79,7 +79,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("parseShellOutput returns null for non-numeric string", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("parseShellOutput");
         $method->setAccessible(true);
@@ -88,7 +88,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("calculateCpuScore returns correct scores for different core counts", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("calculateCpuScore");
         $method->setAccessible(true);
@@ -100,7 +100,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("detectAvailableMemory handles unlimited memory", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("detectAvailableMemory");
         $method->setAccessible(true);
@@ -118,7 +118,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("parseMemoryLimit handles different units", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("parseMemoryLimit");
         $method->setAccessible(true);
@@ -130,7 +130,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("calculateMemoryScore returns correct scores for different memory amounts", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("calculateMemoryScore");
         $method->setAccessible(true);
@@ -143,7 +143,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("calculateDiskIoScore returns float between 0 and 1", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("calculateDiskIoScore");
         $method->setAccessible(true);
@@ -156,7 +156,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("isWindowsWithoutShell correctly detects Windows without shell", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("isWindowsWithoutShell");
         $method->setAccessible(true);
@@ -167,7 +167,7 @@ describe("SystemResourceDetector", function (): void {
     });
 
     test("hasValidShell returns false when shell_exec is not available", function (): void {
-        $detector = new SystemResourceDetector();
+        $detector = new SystemResourceDetector;
         $reflection = new ReflectionClass($detector);
         $method = $reflection->getMethod("hasValidShell");
         $method->setAccessible(true);

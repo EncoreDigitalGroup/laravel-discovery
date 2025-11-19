@@ -163,7 +163,7 @@ describe("DiscoveryConfig", function (): void {
 
     test("addVendor throws exception for non-existent vendor in non-testing environment", function (): void {
         // Create a new DiscoveryConfig directly instead of using Discovery singleton
-        $config = new \EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig();
+        $config = new \EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 
         // Mock App::environment to return false for testing
         App::shouldReceive("environment")

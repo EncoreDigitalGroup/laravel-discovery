@@ -12,7 +12,7 @@ class SystemResourceDetector
 {
     public static function make(): SystemResourceProfile
     {
-        return (new self())->detect();
+        return (new self)->detect();
     }
 
     public function detect(): SystemResourceProfile
@@ -104,6 +104,7 @@ class SystemResourceDetector
 
         // Test if shell_exec works without causing path errors
         $test = @shell_exec("echo test 2>nul");
+
         return $test !== null && $test !== false && trim($test) === "test";
     }
 
@@ -117,8 +118,7 @@ class SystemResourceDetector
         }
         if ($cores >= 2) {
             return 0.6;
-        }
-        else {
+        } else {
             return 0.3;
         }
     }
@@ -144,7 +144,7 @@ class SystemResourceDetector
             "G" => $value * 1024 * 1024 * 1024,
             "M" => $value * 1024 * 1024,
             "K" => $value * 1024,
-            default => (int)$memoryLimit,
+            default => (int) $memoryLimit,
         };
     }
 
@@ -163,8 +163,7 @@ class SystemResourceDetector
 
         if ($memoryInMB >= 256) {
             return 0.4;
-        }
-        else {
+        } else {
             return 0.2;
         }
     }
@@ -194,8 +193,7 @@ class SystemResourceDetector
 
         if ($readTime < 0.01) {
             return 0.6;
-        }
-        else {
+        } else {
             return 0.3;
         }
     }

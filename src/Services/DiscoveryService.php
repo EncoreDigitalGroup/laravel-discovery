@@ -12,7 +12,14 @@ use EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
 use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
 use Fiber;
+
+use function Laravel\Prompts\info;
+
 use Laravel\Prompts\Progress;
+
+use function Laravel\Prompts\progress;
+use function Laravel\Prompts\warning;
+
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
@@ -21,10 +28,6 @@ use PhpParser\PhpVersion;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
-
-use function Laravel\Prompts\info;
-use function Laravel\Prompts\progress;
-use function Laravel\Prompts\warning;
 
 /** @internal */
 class DiscoveryService
@@ -80,6 +83,7 @@ class DiscoveryService
 
         if ($totalFiles === 0) {
             warning("No PHP files found to scan.");
+
             return;
         }
 
@@ -97,6 +101,7 @@ class DiscoveryService
             }
             $allFiles = array_merge($allFiles, $this->collectFiles($directory));
         }
+
         return $allFiles;
     }
 
@@ -115,6 +120,7 @@ class DiscoveryService
         if ($this->config->shouldSearchAllVendors()) {
             $this->config->searchVendors(false);
             $directories[] = base_path("vendor");
+
             return $directories;
         }
 

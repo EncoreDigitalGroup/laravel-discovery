@@ -17,16 +17,16 @@ abstract class TestCase extends BaseTestCase
         $this->setupAppKey();
     }
 
+    public function ignorePackageDiscoveriesFrom(): array
+    {
+        return [];
+    }
+
     protected function getPackageProviders($app): array
     {
         return [
             DiscoveryServiceProvider::class,
         ];
-    }
-
-    public function ignorePackageDiscoveriesFrom(): array
-    {
-        return [];
     }
 
     private function setupAppKey(): void

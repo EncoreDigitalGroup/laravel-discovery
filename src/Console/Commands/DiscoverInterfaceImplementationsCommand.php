@@ -13,7 +13,6 @@ use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Date;
-use InvalidArgumentException;
 
 /** @internal */
 class DiscoverInterfaceImplementationsCommand extends Command
@@ -37,12 +36,14 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         if ($interfaces === []) {
             $this->warn("No interfaces configured for discovery.");
+
             return 0;
         }
 
         foreach ($interfaces as $interface) {
             if ($interface == Str::empty()) {
                 $this->error("Interface Name Cannot Be Empty String");
+
                 return 1;
             }
         }

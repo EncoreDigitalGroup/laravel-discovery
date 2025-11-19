@@ -34,8 +34,7 @@ readonly class SystemResourceProfile
 
         if ($combinedScore >= 0.3) {
             return 500;
-        }
-        else {
+        } else {
             return 100;
         }
     }

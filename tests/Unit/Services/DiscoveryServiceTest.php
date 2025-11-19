@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\App;
 
 describe("DiscoveryService", function (): void {
     beforeEach(function (): void {
-        $this->config = new DiscoveryConfig();
+        $this->config = new DiscoveryConfig;
         $this->service = new DiscoveryService($this->config);
 
         // Ensure cache directory exists
@@ -284,7 +284,7 @@ describe("DiscoveryService", function (): void {
         }
 
         $interfaces = ["TestInterface1", "TestInterface2"];
-        $finder = new \EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder();
+        $finder = new \EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
 
         $reflection = new ReflectionClass($this->service);
         $method = $reflection->getMethod("writeCacheFiles");

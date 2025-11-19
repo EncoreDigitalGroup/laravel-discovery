@@ -160,4 +160,33 @@ describe("DiscoveryConfig", function (): void {
             ->and(Discovery::config()->concurrencyBatchSize)->toBe(25)
             ->and(Discovery::config()->interfaces)->toContain("TestInterface");
     });
+
+    test("addVendor throws exception for non-existent vendor in non-testing environment", function (): void {
+        // Create a new DiscoveryConfig directly instead of using Discovery singleton
+        $config = new \EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig();
+
+        // Mock App::environment to return false for testing
+        App::shouldReceive("environment")
+            ->with("testing")
+            ->once()
+            ->andReturn(false);
+
+        expect(function () use ($config): void {
+            $config->addVendor("nonexistent-vendor");
+        })->toThrow(\EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException::class);
+    });
+
+    test("getResourceProfile creates new resource profile when not set", function (): void {
+        $config = Discovery::refresh();
+
+        // Use reflection to unset the resourceProfile
+        $reflection = new ReflectionClass($config);
+        $property = $reflection->getProperty("resourceProfile");
+        $property->setAccessible(true);
+        $property->setValue($config, null);
+
+        $profile = $config->getResourceProfile();
+
+        expect($profile)->toBeInstanceOf(\EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile::class);
+    });
 });

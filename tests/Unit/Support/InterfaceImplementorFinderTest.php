@@ -136,4 +136,38 @@ describe("InterfaceImplementorFinder", function (): void {
 
         $this->finder->enterNode($classNode);
     });
+
+    test("enter node handles class without implements property", function (): void {
+        $this->finder->setInterfaceName("TestInterface");
+
+        // Set namespace
+        $namespaceName = new Name('App\Test');
+        $namespaceNode = new Namespace_($namespaceName);
+        $this->finder->enterNode($namespaceNode);
+
+        // Create class node without implements
+        $className = new Identifier("TestClass");
+        $classNode = new Class_($className);
+        // Don't set implements property at all
+
+        $result = $this->finder->enterNode($classNode);
+
+        expect($result)->toBeNull();
+        expect($this->finder->getImplementingClassesForInterface("TestInterface"))->toEqual([]);
+    });
+
+    test("setInterfaceNames method initializes implementing classes array", function (): void {
+        $interfaces = ['Interface1', 'Interface2', 'Interface3'];
+        $this->finder->setInterfaceNames($interfaces);
+
+        foreach ($interfaces as $interface) {
+            expect($this->finder->getImplementingClassesForInterface($interface))->toEqual([]);
+        }
+    });
+
+    test("getImplementingClassesForInterface returns empty array for unknown interface", function (): void {
+        $this->finder->setInterfaceName("TestInterface");
+
+        expect($this->finder->getImplementingClassesForInterface("UnknownInterface"))->toEqual([]);
+    });
 });

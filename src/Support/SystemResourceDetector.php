@@ -107,16 +107,12 @@ class SystemResourceDetector
         $unit = strtoupper(substr($memoryLimit, -1));
         $value = (int) substr($memoryLimit, 0, -1);
 
-        switch ($unit) {
-            case 'G':
-                return $value * 1024 * 1024 * 1024;
-            case 'M':
-                return $value * 1024 * 1024;
-            case 'K':
-                return $value * 1024;
-            default:
-                return (int) $memoryLimit;
-        }
+        return match ($unit) {
+            'G' => $value * 1024 * 1024 * 1024,
+            'M' => $value * 1024 * 1024,
+            'K' => $value * 1024,
+            default => (int)$memoryLimit,
+        };
     }
 
     private function calculateMemoryScore(int $availableMemory): float

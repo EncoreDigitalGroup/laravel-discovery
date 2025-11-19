@@ -34,9 +34,8 @@ readonly class SystemResourceProfile
 
         if ($combinedScore >= 0.3) {
             return 500;
-        } else {
-            return 100;
         }
+        return 100;
     }
 
     public function getOptimalConcurrency(): int

@@ -4,9 +4,7 @@ namespace EncoreDigitalGroup\LaravelDiscovery\Providers;
 
 use EncoreDigitalGroup\LaravelDiscovery\Console\Commands\DiscoverInterfaceImplementationsCommand;
 use EncoreDigitalGroup\LaravelDiscovery\Services\DiscoveryService;
-use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
-use Illuminate\Console\OutputStyle;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
 class DiscoveryServiceProvider extends BaseServiceProvider
@@ -15,10 +13,7 @@ class DiscoveryServiceProvider extends BaseServiceProvider
     {
         if ($this->app->runningInConsole() && !$this->isPackageDiscovery()) {
             $this->app->singleton(DiscoveryService::class, function ($app) {
-                return new DiscoveryService(
-                    Discovery::config(),
-                    new OutputStyle($app['console.input'], $app['console.output'])
-                );
+                return new DiscoveryService(Discovery::config());
             });
         }
     }

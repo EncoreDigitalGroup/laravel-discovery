@@ -12,7 +12,6 @@ use EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
 use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
 use Fiber;
-use Illuminate\Console\OutputStyle;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
@@ -21,7 +20,10 @@ use PhpParser\PhpVersion;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use SplFileInfo;
+
+use function Laravel\Prompts\info;
 use function Laravel\Prompts\progress;
+use function Laravel\Prompts\warning;
 
 /** @internal */
 class DiscoveryService
@@ -59,8 +61,7 @@ class DiscoveryService
     private NodeTraverser $traverser;
 
     public function __construct(
-        private readonly DiscoveryConfig $config,
-        private readonly OutputStyle     $output
+        private readonly DiscoveryConfig $config
     ) {
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
@@ -76,11 +77,11 @@ class DiscoveryService
         $totalFiles = count($allFiles);
 
         if ($totalFiles === 0) {
-            $this->output->warning("No PHP files found to scan.");
+            warning("No PHP files found to scan.");
             return;
         }
 
-        $this->output->info("Scanning " . Number::format($totalFiles) . " files...");
+        info("Scanning " . Number::format($totalFiles) . " files...");
         $this->processFiles($allFiles);
         $this->writeCacheFiles($interfaces, $finder);
     }
@@ -219,7 +220,7 @@ class DiscoveryService
     {
         $batches = array_chunk($files, max(1, $batchSize));
 
-        $this->output->info("Using progressive scanning mode (Batch Size: {$batchSize})");
+        info("Using progressive scanning mode (Batch Size: {$batchSize})");
 
         foreach ($batches as $batch) {
             $this->processBatchConcurrently($batch, $resourceProfile);

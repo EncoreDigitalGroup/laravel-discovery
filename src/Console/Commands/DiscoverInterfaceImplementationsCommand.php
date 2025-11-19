@@ -255,15 +255,8 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
     private function processFilesProgressively(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
     {
-        $totalFiles = count($files);
-        $processedFiles = 0;
-
         foreach (array_chunk($files, max(1, $batchSize)) as $batch) {
             $this->processBatchConcurrently($batch, $resourceProfile);
-
-            $processedFiles += count($batch);
-            $percentage = round(($processedFiles / $totalFiles) * 100, 1);
-            $this->info("Processed {$processedFiles}/{$totalFiles} files ({$percentage}%)");
 
             gc_collect_cycles();
         }

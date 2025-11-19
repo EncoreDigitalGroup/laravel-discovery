@@ -37,24 +37,38 @@ class SystemResourceDetector
 
     private function detectCpuCores(): int
     {
-        if (function_exists('shell_exec')) {
-            $output = shell_exec('nproc 2>/dev/null');
-            if ($output && is_numeric(trim($output))) {
-                return (int) trim($output);
-            }
-
-            $output = shell_exec('echo %NUMBER_OF_PROCESSORS% 2>/dev/null');
-            if ($output && is_numeric(trim($output))) {
-                return (int) trim($output);
-            }
-        }
-
+        // Try environment variable first (works on both Windows and Unix)
         $processors = getenv('NUMBER_OF_PROCESSORS');
         if ($processors && is_numeric($processors)) {
             return (int) $processors;
         }
 
+        // Try shell commands only if shell_exec is available
+        if (function_exists('shell_exec') && !$this->isWindowsWithoutShell()) {
+            // Linux/macOS
+            $output = shell_exec('nproc 2>/dev/null');
+            if ($output && is_numeric(trim($output))) {
+                return (int) trim($output);
+            }
+        }
+
         return 2;
+    }
+
+    private function isWindowsWithoutShell(): bool
+    {
+        return PHP_OS_FAMILY === 'Windows' && !$this->hasValidShell();
+    }
+
+    private function hasValidShell(): bool
+    {
+        if (!function_exists('shell_exec')) {
+            return false;
+        }
+
+        // Test if shell_exec works without causing path errors
+        $test = @shell_exec('echo test 2>nul');
+        return $test !== null && trim($test) === 'test';
     }
 
     private function calculateCpuScore(int $cores): float

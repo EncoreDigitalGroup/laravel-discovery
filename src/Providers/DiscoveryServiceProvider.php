@@ -13,20 +13,27 @@ class DiscoveryServiceProvider extends BaseServiceProvider
 {
     public function register(): void
     {
-        if ($this->app->runningInConsole()) {
+        if ($this->app->runningInConsole() && !$this->isPackageDiscovery()) {
             $this->app->singleton(DiscoveryService::class, function ($app) {
                 return new DiscoveryService(
                     Discovery::config(),
-                    new OutputStyle($app["console.input"], $app["console.output"])
+                    new OutputStyle($app['console.input'], $app['console.output'])
                 );
             });
         }
     }
 
+    private function isPackageDiscovery(): bool
+    {
+        return in_array('package:discover', $_SERVER['argv'] ?? []);
+    }
+
     public function boot(): void
     {
-        $this->commands([
-            DiscoverInterfaceImplementationsCommand::class,
-        ]);
+        if ($this->app->runningInConsole() && !$this->isPackageDiscovery()) {
+            $this->commands([
+                DiscoverInterfaceImplementationsCommand::class,
+            ]);
+        }
     }
 }

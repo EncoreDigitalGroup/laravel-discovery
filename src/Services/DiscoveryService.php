@@ -59,8 +59,8 @@ class DiscoveryService
     private NodeTraverser $traverser;
 
     public function __construct(
-        private DiscoveryConfig $config,
-        private OutputStyle $output
+        private readonly DiscoveryConfig $config,
+        private readonly OutputStyle     $output
     ) {
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;

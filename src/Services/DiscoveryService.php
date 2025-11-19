@@ -12,6 +12,7 @@ use EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
 use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
 use Fiber;
+use Laravel\Prompts\Progress;
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
@@ -178,7 +179,7 @@ class DiscoveryService
                ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000);
     }
 
-    private function processFileWithProgress(SplFileInfo $file, $progress, int $batchSize, SystemResourceProfile $resourceProfile): void
+    private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize, SystemResourceProfile $resourceProfile): void
     {
         static $batch = [];
         static $totalProcessed = 0;

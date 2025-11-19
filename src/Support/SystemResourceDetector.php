@@ -37,28 +37,58 @@ class SystemResourceDetector
 
     private function detectCpuCores(): int
     {
-        // Try environment variable first (works on both Windows and Unix)
-        $processors = getenv('NUMBER_OF_PROCESSORS');
-        if ($processors && is_numeric($processors)) {
-            return (int) $processors;
+        $cores = $this->tryEnvironmentVariable();
+        if ($cores !== null) {
+            return $cores;
         }
 
-        // Try shell commands only if shell_exec is available
-        if (function_exists('shell_exec') && !$this->isWindowsWithoutShell()) {
-            // Linux
-            $output = shell_exec('nproc 2>/dev/null');
-            if ($output && is_numeric(trim($output))) {
-                return (int) trim($output);
-            }
-
-            // macOS
-            $output = shell_exec('sysctl -n hw.ncpu 2>/dev/null');
-            if ($output && is_numeric(trim($output))) {
-                return (int) trim($output);
-            }
+        $cores = $this->tryShellCommands();
+        if ($cores !== null) {
+            return $cores;
         }
 
         return 2;
+    }
+
+    private function tryEnvironmentVariable(): ?int
+    {
+        $processors = getenv('NUMBER_OF_PROCESSORS');
+
+        return ($processors && is_numeric($processors)) ? (int) $processors : null;
+    }
+
+    private function tryShellCommands(): ?int
+    {
+        if (!function_exists('shell_exec') || $this->isWindowsWithoutShell()) {
+            return null;
+        }
+
+        return $this->tryLinuxCommand() ?? $this->tryMacOsCommand();
+    }
+
+    private function tryLinuxCommand(): ?int
+    {
+        $output = shell_exec('nproc 2>/dev/null');
+
+        return $this->parseShellOutput($output);
+    }
+
+    private function tryMacOsCommand(): ?int
+    {
+        $output = shell_exec('sysctl -n hw.ncpu 2>/dev/null');
+
+        return $this->parseShellOutput($output);
+    }
+
+    private function parseShellOutput(string|false|null $output): ?int
+    {
+        if ($output === null || $output === false) {
+            return null;
+        }
+
+        $trimmed = trim($output);
+
+        return is_numeric($trimmed) ? (int) $trimmed : null;
     }
 
     private function isWindowsWithoutShell(): bool
@@ -74,7 +104,7 @@ class SystemResourceDetector
 
         // Test if shell_exec works without causing path errors
         $test = @shell_exec('echo test 2>nul');
-        return $test !== null && trim($test) === 'test';
+        return $test !== null && $test !== false && trim($test) === 'test';
     }
 
     private function calculateCpuScore(int $cores): float

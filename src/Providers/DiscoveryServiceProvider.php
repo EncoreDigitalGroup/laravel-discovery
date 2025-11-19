@@ -20,7 +20,7 @@ class DiscoveryServiceProvider extends BaseServiceProvider
 
     private function isPackageDiscovery(): bool
     {
-        return in_array('package:discover', $_SERVER['argv'] ?? []);
+        return in_array('package:discover', $_SERVER['argv'] ?? []) && !$this->app->environment('testing');
     }
 
     public function boot(): void

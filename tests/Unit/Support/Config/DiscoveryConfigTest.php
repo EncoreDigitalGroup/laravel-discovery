@@ -129,8 +129,11 @@ describe("DiscoveryConfig", function (): void {
         expect(Discovery::config()->interfaces)->not->toContain("", "FakeInterface");
     });
 
-    test("constructor sets default concurrency batch size to 1000", function (): void {
-        expect(Discovery::refresh()->concurrencyBatchSize)->toBe(1000);
+    test("constructor sets default concurrency batch size based on system resources", function (): void {
+        $batchSize = Discovery::refresh()->concurrencyBatchSize;
+        expect($batchSize)->toBeGreaterThanOrEqual(100)
+            ->and($batchSize)->toBeLessThanOrEqual(2000)
+            ->and(in_array($batchSize, [100, 500, 1000, 2000]))->toBeTrue();
     });
 
     test("setConcurrencyBatchSize updates batch size", function (): void {

@@ -27,7 +27,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
         parent::__construct();
     }
 
-    public function handle(): void
+    public function handle(): int
     {
         $startedAt = Date::now();
         $this->newLine();
@@ -37,12 +37,13 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         if ($interfaces === []) {
             $this->warn("No interfaces configured for discovery.");
-            return;
+            return 0;
         }
 
         foreach ($interfaces as $interface) {
             if ($interface == Str::empty()) {
-                throw new InvalidArgumentException("Interface Name Cannot Be Empty String");
+                $this->error("Interface Name Cannot Be Empty String");
+                return 1;
             }
         }
 
@@ -53,5 +54,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
         $duration = $startedAt->diff(Date::now());
         $this->info("Discovery completed in " . $duration->forHumans());
         $this->newLine(2);
+
+        return 0;
     }
 }

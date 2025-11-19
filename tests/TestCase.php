@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use EncoreDigitalGroup\LaravelDiscovery\Providers\DiscoveryServiceProvider;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Config;
 use Orchestra\Testbench\TestCase as BaseTestCase;
@@ -14,6 +15,13 @@ abstract class TestCase extends BaseTestCase
         parent::setUp();
 
         $this->setupAppKey();
+    }
+
+    protected function getPackageProviders($app): array
+    {
+        return [
+            DiscoveryServiceProvider::class,
+        ];
     }
 
     public function ignorePackageDiscoveriesFrom(): array

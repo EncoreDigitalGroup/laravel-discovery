@@ -9,6 +9,7 @@ namespace EncoreDigitalGroup\LaravelDiscovery\Console\Commands;
 
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
 use EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
+use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
 use Fiber;
@@ -197,16 +198,22 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
     private function processFilesWithProgress(array $files): void
     {
-        $batchSize = Discovery::config()->concurrencyBatchSize;
+        $config = Discovery::config();
+        $batchSize = $config->concurrencyBatchSize;
+        $resourceProfile = $config->getResourceProfile();
 
-        progress(
-            label: "Processing files",
-            steps: $files,
-            callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize),
-        );
+        if ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000) {
+            $this->processFilesProgressively($files, $batchSize, $resourceProfile);
+        } else {
+            progress(
+                label: "Processing files",
+                steps: $files,
+                callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
+            );
+        }
     }
 
-    private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize): void
+    private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize, SystemResourceProfile $resourceProfile): void
     {
         static $batch = [];
         static $totalProcessed = 0;
@@ -215,23 +222,53 @@ class DiscoverInterfaceImplementationsCommand extends Command
         $totalProcessed++;
 
         if (count($batch) >= $batchSize || $totalProcessed === $progress->total) {
-            $this->processBatchConcurrently($batch);
+            $this->processBatchConcurrently($batch, $resourceProfile);
             $batch = [];
+
+            // Trigger garbage collection on lower-end systems
+            if ($resourceProfile->memoryScore < 0.5 && $totalProcessed % ($batchSize * 2) === 0) {
+                gc_collect_cycles();
+            }
         }
     }
 
-    private function processBatchConcurrently(array $files): void
+    private function processBatchConcurrently(array $files, SystemResourceProfile $resourceProfile): void
     {
-        $fibers = [];
+        $optimalConcurrency = $resourceProfile->getOptimalConcurrency();
+        $chunks = array_chunk($files, max(1, intval(count($files) / $optimalConcurrency)));
 
-        foreach ($files as $file) {
-            $fibers[] = new Fiber(function () use ($file): void {
-                $this->processFile($file);
-            });
+        foreach ($chunks as $chunk) {
+            $fibers = [];
+
+            foreach ($chunk as $file) {
+                $fibers[] = new Fiber(function () use ($file): void {
+                    $this->processFile($file);
+                });
+            }
+
+            foreach ($fibers as $fiber) {
+                $fiber->start();
+            }
         }
+    }
 
-        foreach ($fibers as $fiber) {
-            $fiber->start();
+    private function processFilesProgressively(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
+    {
+        $this->info("Using progressive scanning mode for large file set on lower-end system.");
+
+        $totalFiles = count($files);
+        $processedFiles = 0;
+
+        foreach (array_chunk($files, max(1, $batchSize)) as $batch) {
+            $this->processBatchConcurrently($batch, $resourceProfile);
+
+            $processedFiles += count($batch);
+            $percentage = round(($processedFiles / $totalFiles) * 100, 1);
+            $this->info("Processed {$processedFiles}/{$totalFiles} files ({$percentage}%)");
+
+            // Force garbage collection and brief pause for lower-end systems
+            gc_collect_cycles();
+            usleep(10000); // 10ms pause
         }
     }
 

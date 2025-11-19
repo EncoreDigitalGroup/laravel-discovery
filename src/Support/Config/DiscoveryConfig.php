@@ -2,6 +2,8 @@
 
 namespace EncoreDigitalGroup\LaravelDiscovery\Support\Config;
 
+use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceDetector;
+use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Str;
 use Illuminate\Support\Facades\App;
@@ -11,13 +13,16 @@ class DiscoveryConfig
     public string $cachePath;
     public array $vendors = [];
     public array $interfaces = [];
-    public int $concurrencyBatchSize = 1000;
+    public int $concurrencyBatchSize;
     private bool $searchVendors = false;
     private bool $searchAllVendors = false;
+    private ?SystemResourceProfile $resourceProfile = null;
 
     public function __construct()
     {
         $this->cachePath = base_path("bootstrap/cache/discovery");
+        $this->resourceProfile = SystemResourceDetector::make();
+        $this->concurrencyBatchSize = $this->resourceProfile->getOptimalBatchSize();
     }
 
     public function addVendor(string $vendor): self
@@ -80,5 +85,14 @@ class DiscoveryConfig
         $this->concurrencyBatchSize = max(1, $size);
 
         return $this;
+    }
+
+    public function getResourceProfile(): SystemResourceProfile
+    {
+        if(!isset($this->resourceProfile)) {
+            $this->resourceProfile = SystemResourceDetector::make();
+        }
+
+        return $this->resourceProfile;
     }
 }

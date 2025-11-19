@@ -119,6 +119,7 @@ class SystemResourceDetector
         if ($cores >= 2) {
             return 0.6;
         }
+
         return 0.3;
     }
 
@@ -163,6 +164,7 @@ class SystemResourceDetector
         if ($memoryInMB >= 256) {
             return 0.4;
         }
+
         return 0.2;
     }
 
@@ -192,6 +194,7 @@ class SystemResourceDetector
         if ($readTime < 0.01) {
             return 0.6;
         }
+
         return 0.3;
     }
 }

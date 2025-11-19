@@ -45,6 +45,11 @@ readonly class SystemResourceProfile
             return max(1, intval($baseConcurrency / 2));
         }
 
+        // macOS optimization: Use more aggressive concurrency
+        if (PHP_OS_FAMILY === 'Darwin') {
+            return min($this->cpuCores * 2, $baseConcurrency + 4);
+        }
+
         return $baseConcurrency;
     }
 

@@ -45,8 +45,14 @@ class SystemResourceDetector
 
         // Try shell commands only if shell_exec is available
         if (function_exists('shell_exec') && !$this->isWindowsWithoutShell()) {
-            // Linux/macOS
+            // Linux
             $output = shell_exec('nproc 2>/dev/null');
+            if ($output && is_numeric(trim($output))) {
+                return (int) trim($output);
+            }
+
+            // macOS
+            $output = shell_exec('sysctl -n hw.ncpu 2>/dev/null');
             if ($output && is_numeric(trim($output))) {
                 return (int) trim($output);
             }

@@ -205,13 +205,18 @@ class DiscoverInterfaceImplementationsCommand extends Command
         if ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000) {
             $this->processFilesProgressively($files, $batchSize, $resourceProfile);
         } else {
-            progress(
-                label: "Processing files",
-                steps: $files,
-                callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
-                hint: "Batch Size: {$batchSize}"
-            );
+            $this->progressBar($files, $batchSize, $resourceProfile);
         }
+    }
+
+    private function progressBar(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
+    {
+        progress(
+            label: "Processing files",
+            steps: $files,
+            callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
+            hint: "Batch Size: {$batchSize}"
+        );
     }
 
     private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize, SystemResourceProfile $resourceProfile): void
@@ -255,11 +260,17 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
     private function processFilesProgressively(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
     {
-        foreach (array_chunk($files, max(1, $batchSize)) as $batch) {
-            $this->processBatchConcurrently($batch, $resourceProfile);
+        $batches = array_chunk($files, max(1, $batchSize));
 
-            gc_collect_cycles();
-        }
+        progress(
+            label: "Processing files (Progressive Mode)",
+            steps: $batches,
+            callback: function($batch) use ($resourceProfile) {
+                $this->processBatchConcurrently($batch, $resourceProfile);
+                gc_collect_cycles();
+            },
+            hint: "Batch Size: {$batchSize}"
+        );
     }
 
     private function processFile(SplFileInfo $file): void

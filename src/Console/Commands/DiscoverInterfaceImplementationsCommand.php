@@ -255,8 +255,6 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
     private function processFilesProgressively(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
     {
-        $this->info("Using progressive scanning mode for large file set on lower-end system.");
-
         $totalFiles = count($files);
         $processedFiles = 0;
 
@@ -267,9 +265,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
             $percentage = round(($processedFiles / $totalFiles) * 100, 1);
             $this->info("Processed {$processedFiles}/{$totalFiles} files ({$percentage}%)");
 
-            // Force garbage collection and brief pause for lower-end systems
             gc_collect_cycles();
-            usleep(10000); // 10ms pause
         }
     }
 

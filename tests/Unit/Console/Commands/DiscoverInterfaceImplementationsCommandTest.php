@@ -1,8 +1,8 @@
 <?php
 
 use EncoreDigitalGroup\LaravelDiscovery\Console\Commands\DiscoverInterfaceImplementationsCommand;
+use EncoreDigitalGroup\LaravelDiscovery\Services\DiscoveryService;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
-use Illuminate\Support\Facades\Artisan;
 use Tests\TestHelpers\TestInterface;
 
 beforeEach(function (): void {
@@ -37,244 +37,46 @@ afterEach(function (): void {
 });
 
 describe("DiscoverInterfaceImplementationsCommand", function (): void {
-    test("discoverAll method throws exception for empty interface name", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $discoverAllMethod = $reflection->getMethod("discoverAll");
-        $discoverAllMethod->setAccessible(true);
-
-        expect(function () use ($command, $discoverAllMethod): void {
-            $discoverAllMethod->invoke($command, [""]);
-        })->toThrow(InvalidArgumentException::class, "Interface Name Cannot Be Empty String");
-    });
-
-    test("discoverAll method validates interface name parameter", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $discoverAllMethod = $reflection->getMethod("discoverAll");
-        $discoverAllMethod->setAccessible(true);
-
-        // Test that method exists and is private
-        expect($discoverAllMethod->isPrivate())->toBeTrue()
-            ->and($reflection->hasMethod("discoverAll"))->toBeTrue();
-    });
-
-    test("directories method returns default app path", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod("directories");
-        $directoriesMethod->setAccessible(true);
-
-        $directories = $directoriesMethod->invoke($command);
-
-        expect($directories)->toContain(app_path());
-    });
-
-    test("directories method includes app_modules when it exists", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod("directories");
-        $directoriesMethod->setAccessible(true);
-
-        // Create temporary app_modules directory
-        $shouldCleanup = false;
-        $appModulesPath = base_path("app_modules");
-        if (!is_dir($appModulesPath)) {
-            mkdir($appModulesPath, 0755, true);
-            $shouldCleanup = true;
-        }
-
-        $directories = $directoriesMethod->invoke($command);
-
-        expect($directories)->toContain($appModulesPath);
-
-        // Cleanup
-        if ($shouldCleanup) {
-            rmdir($appModulesPath);
-        }
-    });
-
-    test("directories method includes app-modules when it exists", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod("directories");
-        $directoriesMethod->setAccessible(true);
-
-        // Create temporary app-modules directory
-        $appModulesPath = base_path("app-modules");
-        $shouldCleanup = false;
-        if (!is_dir($appModulesPath)) {
-            mkdir($appModulesPath, 0755, true);
-            $shouldCleanup = true;
-        }
-
-        $directories = $directoriesMethod->invoke($command);
-
-        expect($directories)->toContain($appModulesPath);
-
-        // Cleanup
-        if ($shouldCleanup) {
-            rmdir($appModulesPath);
-        }
-    });
-
-    test("directories method includes all vendors when search all vendors enabled", function (): void {
-        Discovery::config()->searchAllVendors();
-
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod("directories");
-        $directoriesMethod->setAccessible(true);
-
-        $directories = $directoriesMethod->invoke($command);
-
-        expect($directories)->toContain(base_path("vendor"))
-            ->and(Discovery::config()->shouldSearchVendors())->toBeFalse();
-
-        // Reset
-        Discovery::config()->searchAllVendors(false);
-    });
-
-    test("directories method includes specific vendors when configured", function (): void {
-        Discovery::config()->addVendor("laravel");
-
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $directoriesMethod = $reflection->getMethod("directories");
-        $directoriesMethod->setAccessible(true);
-
-        $directories = $directoriesMethod->invoke($command);
-
-        expect($directories)->toContain(base_path("vendor/laravel"));
-
-        // Reset to prevent issues in other tests
-        Discovery::config()->searchVendors(false);
-        Discovery::config()->vendors = [];
-    });
-
-    test("collectFiles method handles controlled directory without crashing", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $collectFilesMethod = $reflection->getMethod("collectFiles");
-        $collectFilesMethod->setAccessible(true);
-
-        // Test with tests directory (small and controlled)
-        $testDir = dirname(__FILE__);
-
-        expect(function () use ($command, $collectFilesMethod, $testDir): void {
-            $collectFilesMethod->invoke($command, $testDir);
-        })->not->toThrow(Exception::class);
-    });
-
     test("command signature and description are correctly set", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
+        $discoveryService = $this->mock(DiscoveryService::class);
+        $command = new DiscoverInterfaceImplementationsCommand($discoveryService);
 
         expect($command->getName())->toBe("discovery:run")
-            ->and($command->getDescription())->toBe("Generate a list of classes implementing Tenant interfaces");
-    });
-
-    test("processFile method handles parsing errors gracefully", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $processFileMethod = $reflection->getMethod("processFile");
-        $processFileMethod->setAccessible(true);
-
-        // Create a temporary directory with an invalid PHP file
-        $testDir = sys_get_temp_dir() . "/discovery-traverse-test";
-        if (!is_dir($testDir)) {
-            mkdir($testDir, 0755, true);
-        }
-        file_put_contents($testDir . "/invalid.php", "<?php invalid syntax here");
-
-        $file = new SplFileInfo($testDir . "/invalid.php");
-
-        expect(function () use ($command, $processFileMethod, $file): void {
-            $processFileMethod->invoke($command, $file);
-        })->not->toThrow(Exception::class);
-
-        // Cleanup
-        unlink($testDir . "/invalid.php");
-        rmdir($testDir);
-    });
-
-    test("collectFiles method skips non-php files", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $collectFilesMethod = $reflection->getMethod("collectFiles");
-        $collectFilesMethod->setAccessible(true);
-
-        // Create a temporary directory with a non-PHP file
-        $testDir = sys_get_temp_dir() . "/discovery-traverse-test2";
-        if (!is_dir($testDir)) {
-            mkdir($testDir, 0755, true);
-        }
-        file_put_contents($testDir . "/test.txt", "not php content");
-
-        $files = $collectFilesMethod->invoke($command, $testDir);
-        expect($files)->toBeArray()->toBeEmpty();
-
-        // Cleanup
-        unlink($testDir . "/test.txt");
-        rmdir($testDir);
-    });
-
-    test("processFile method handles empty files", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $processFileMethod = $reflection->getMethod("processFile");
-        $processFileMethod->setAccessible(true);
-
-        // Create a temporary directory with an empty PHP file
-        $testDir = sys_get_temp_dir() . "/discovery-traverse-test3";
-        if (!is_dir($testDir)) {
-            mkdir($testDir, 0755, true);
-        }
-        file_put_contents($testDir . "/empty.php", "");
-
-        $file = new SplFileInfo($testDir . "/empty.php");
-
-        expect(function () use ($command, $processFileMethod, $file): void {
-            $processFileMethod->invoke($command, $file);
-        })->not->toThrow(Exception::class);
-
-        // Cleanup
-        unlink($testDir . "/empty.php");
-        rmdir($testDir);
-    });
-
-    test("processFile method handles null AST from parser", function (): void {
-        $command = new DiscoverInterfaceImplementationsCommand;
-        $reflection = new ReflectionClass($command);
-        $processFileMethod = $reflection->getMethod("processFile");
-        $processFileMethod->setAccessible(true);
-
-        // Create a temporary directory with minimal PHP file that might return null AST
-        $testDir = sys_get_temp_dir() . "/discovery-traverse-test4";
-        if (!is_dir($testDir)) {
-            mkdir($testDir, 0755, true);
-        }
-        file_put_contents($testDir . "/minimal.php", "<?php");
-
-        $file = new SplFileInfo($testDir . "/minimal.php");
-
-        expect(function () use ($command, $processFileMethod, $file): void {
-            $processFileMethod->invoke($command, $file);
-        })->not->toThrow(Exception::class);
-
-        // Cleanup
-        unlink($testDir . "/minimal.php");
-        rmdir($testDir);
+            ->and($command->getDescription())->toBe("Generate a list of classes implementing interfaces");
     });
 
     test("command runs successfully with no interfaces configured", function (): void {
-        $result = Artisan::call(DiscoverInterfaceImplementationsCommand::class);
+        Discovery::config()->interfaces = [];
 
-        expect($result)->toBe(0);
+        $this->artisan("discovery:run")
+            ->assertExitCode(0);
     });
 
     test("command runs successfully with configured interfaces", function (): void {
         Discovery::config()
             ->addInterface(TestInterface::class);
+
+        // Create a test implementation in app directory so discovery can find it
+        $appPath = app_path();
+        if (!is_dir($appPath)) {
+            mkdir($appPath, 0755, true);
+        }
+
+        $testImplFile = $appPath . "/TestImplementation.php";
+        file_put_contents($testImplFile, '<?php
+
+namespace App;
+
+use Tests\TestHelpers\TestInterface;
+
+class TestImplementation implements TestInterface
+{
+    public function testMethod(): void
+    {
+        // Test implementation
+    }
+}
+');
 
         $this->artisan("discovery:run")
             ->assertExitCode(0);
@@ -285,7 +87,12 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
 
         // Verify cache files contain arrays
         $testCache = require $testCacheFile;
-        expect($testCache)->toBeArray();
+        expect($testCache)->toBeArray()
+            // Should contain the test implementation we created
+            ->and($testCache)->toContain('App\TestImplementation');
+
+        // Cleanup
+        unlink($testImplFile);
     });
 
     test("command creates cache directory structure", function (): void {
@@ -302,14 +109,45 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
 
         Discovery::config()->addInterface(TestInterface::class);
 
+        // Create a test implementation so cache files are created
+        $appPath = app_path();
+        if (!is_dir($appPath)) {
+            mkdir($appPath, 0755, true);
+        }
+
+        $testImplFile = $appPath . "/TestImplementation.php";
+        file_put_contents($testImplFile, '<?php
+namespace App;
+use Tests\TestHelpers\TestInterface;
+class TestImplementation implements TestInterface {
+    public function testMethod(): void {}
+}');
+
         $this->artisan("discovery:run")
             ->assertExitCode(0);
 
         expect(is_dir($this->cachePath))->toBeTrue();
+
+        // Cleanup
+        unlink($testImplFile);
     });
 
     test("command creates cache files with proper structure", function (): void {
         Discovery::config()->addInterface(TestInterface::class);
+
+        // Create a test implementation so cache files are created
+        $appPath = app_path();
+        if (!is_dir($appPath)) {
+            mkdir($appPath, 0755, true);
+        }
+
+        $testImplFile = $appPath . "/TestImplementation.php";
+        file_put_contents($testImplFile, '<?php
+namespace App;
+use Tests\TestHelpers\TestInterface;
+class TestImplementation implements TestInterface {
+    public function testMethod(): void {}
+}');
 
         $this->artisan("discovery:run")
             ->assertExitCode(0);
@@ -324,5 +162,16 @@ describe("DiscoverInterfaceImplementationsCommand", function (): void {
         $cacheContent = file_get_contents($cacheFile);
         expect($cacheContent)->toStartWith("<?php")
             ->and($cacheContent)->toContain("return");
+
+        // Cleanup
+        unlink($testImplFile);
+    });
+
+    test("command handles empty interface name validation", function (): void {
+        // Directly add an empty string to interfaces array to test validation
+        Discovery::config()->interfaces = [""];
+
+        $this->artisan("discovery:run")
+            ->assertExitCode(1);
     });
 });

@@ -118,9 +118,9 @@ class SystemResourceDetector
         }
         if ($cores >= 2) {
             return 0.6;
-        } else {
-            return 0.3;
         }
+
+        return 0.3;
     }
 
     private function detectAvailableMemory(): int
@@ -163,9 +163,9 @@ class SystemResourceDetector
 
         if ($memoryInMB >= 256) {
             return 0.4;
-        } else {
-            return 0.2;
         }
+
+        return 0.2;
     }
 
     private function calculateDiskIoScore(): float
@@ -193,8 +193,8 @@ class SystemResourceDetector
 
         if ($readTime < 0.01) {
             return 0.6;
-        } else {
-            return 0.3;
         }
+
+        return 0.3;
     }
 }

@@ -209,6 +209,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
                 label: "Processing files",
                 steps: $files,
                 callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
+                hint: "Batch Size: {$batchSize}"
             );
         }
     }

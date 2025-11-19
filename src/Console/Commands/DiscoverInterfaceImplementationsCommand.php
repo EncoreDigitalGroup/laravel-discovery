@@ -202,21 +202,32 @@ class DiscoverInterfaceImplementationsCommand extends Command
         $batchSize = $config->concurrencyBatchSize;
         $resourceProfile = $config->getResourceProfile();
 
-        if ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000) {
+        if ($this->shouldUseProgressiveProcessing($resourceProfile, $files)) {
             $this->processFilesProgressively($files, $batchSize, $resourceProfile);
         } else {
-            $this->progressBar($files, $batchSize, $resourceProfile);
+            $this->progressBar(
+                $files,
+                "Processing files",
+                fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
+                "Batch Size: {$batchSize}"
+            );
         }
     }
 
-    private function progressBar(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
+    private function progressBar(array $steps, string $label, callable $callback, string $hint): void
     {
         progress(
-            label: "Processing files",
-            steps: $files,
-            callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
-            hint: "Batch Size: {$batchSize}"
+            label: $label,
+            steps: $steps,
+            callback: $callback,
+            hint: $hint
         );
+    }
+
+    private function shouldUseProgressiveProcessing(SystemResourceProfile $resourceProfile, array $files): bool
+    {
+        return PHP_OS_FAMILY === 'Windows' ||
+               ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000);
     }
 
     private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize, SystemResourceProfile $resourceProfile): void
@@ -262,14 +273,14 @@ class DiscoverInterfaceImplementationsCommand extends Command
     {
         $batches = array_chunk($files, max(1, $batchSize));
 
-        progress(
-            label: "Processing files (Progressive Mode)",
-            steps: $batches,
-            callback: function($batch) use ($resourceProfile) {
+        $this->progressBar(
+            $batches,
+            "Processing files (Progressive Mode)",
+            function($batch) use ($resourceProfile) {
                 $this->processBatchConcurrently($batch, $resourceProfile);
                 gc_collect_cycles();
             },
-            hint: "Batch Size: {$batchSize}"
+            "Batch Size: {$batchSize}"
         );
     }
 

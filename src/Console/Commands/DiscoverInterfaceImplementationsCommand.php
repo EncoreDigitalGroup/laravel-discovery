@@ -205,23 +205,13 @@ class DiscoverInterfaceImplementationsCommand extends Command
         if ($this->shouldUseProgressiveProcessing($resourceProfile, $files)) {
             $this->processFilesProgressively($files, $batchSize, $resourceProfile);
         } else {
-            $this->progressBar(
-                $files,
-                "Processing files",
-                fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
-                "Batch Size: {$batchSize}"
+            progress(
+                label: "Processing files",
+                steps: $files,
+                callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
+                hint: "Batch Size: {$batchSize}"
             );
         }
-    }
-
-    private function progressBar(array $steps, string $label, callable $callback, string $hint): void
-    {
-        progress(
-            label: $label,
-            steps: $steps,
-            callback: $callback,
-            hint: $hint
-        );
     }
 
     private function shouldUseProgressiveProcessing(SystemResourceProfile $resourceProfile, array $files): bool
@@ -273,15 +263,13 @@ class DiscoverInterfaceImplementationsCommand extends Command
     {
         $batches = array_chunk($files, max(1, $batchSize));
 
-        $this->progressBar(
-            $batches,
-            "Processing files (Progressive Mode)",
-            function($batch) use ($resourceProfile) {
-                $this->processBatchConcurrently($batch, $resourceProfile);
-                gc_collect_cycles();
-            },
-            "Batch Size: {$batchSize}"
-        );
+        $this->info("Using progressive scanning mode (Batch Size: {$batchSize})");
+
+        foreach ($batches as $batch) {
+            $this->processBatchConcurrently($batch, $resourceProfile);
+
+            gc_collect_cycles();
+        }
     }
 
     private function processFile(SplFileInfo $file): void

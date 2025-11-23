@@ -182,8 +182,9 @@ class DiscoveryService
 
     private function shouldUseProgressiveProcessing(SystemResourceProfile $resourceProfile, array $files): bool
     {
-        return PHP_OS_FAMILY === "Windows" ||
-               ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000);
+        return getenv("CI") == "true"
+            || PHP_OS_FAMILY === "Windows"
+            || ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000);
     }
 
     private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize, SystemResourceProfile $resourceProfile): void

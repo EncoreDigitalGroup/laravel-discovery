@@ -66,7 +66,8 @@ class DiscoveryService
 
     public function __construct(
         private readonly DiscoveryConfig $config
-    ) {
+    )
+    {
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
     }
@@ -174,7 +175,7 @@ class DiscoveryService
             progress(
                 label: "Processing files",
                 steps: $files,
-                callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
+                callback: fn($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
                 hint: "Batch Size: {$batchSize}"
             );
         }
@@ -182,8 +183,9 @@ class DiscoveryService
 
     private function shouldUseProgressiveProcessing(SystemResourceProfile $resourceProfile, array $files): bool
     {
-        return PHP_OS_FAMILY === "Windows" ||
-               ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000);
+        return getenv("CI") == "true"
+            || PHP_OS_FAMILY === "Windows"
+            || ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000);
     }
 
     private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize, SystemResourceProfile $resourceProfile): void

@@ -2,7 +2,6 @@
 
 use EncoreDigitalGroup\LaravelDiscovery\Services\DiscoveryService;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
-use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use Illuminate\Support\Facades\App;
 
 describe("DiscoveryService", function (): void {

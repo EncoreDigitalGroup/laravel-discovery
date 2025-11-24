@@ -14,10 +14,6 @@ use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
 use Fiber;
 
 use function Laravel\Prompts\info;
-
-use Laravel\Prompts\Progress;
-
-use function Laravel\Prompts\progress;
 use function Laravel\Prompts\warning;
 
 use PhpParser\Error;
@@ -66,8 +62,7 @@ class DiscoveryService
 
     public function __construct(
         private readonly DiscoveryConfig $config
-    )
-    {
+    ) {
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
     }

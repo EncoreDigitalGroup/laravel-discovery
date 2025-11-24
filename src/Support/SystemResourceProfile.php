@@ -11,15 +11,15 @@ namespace EncoreDigitalGroup\LaravelDiscovery\Support;
 readonly class SystemResourceProfile
 {
     public function __construct(
-        public int   $cpuCores,
+        public int $cpuCores,
         public float $cpuScore,
-        public int   $memoryAvailable,
+        public int $memoryAvailable,
         public float $memoryScore,
         public float $diskIoScore,
-        public bool  $opcacheEnabled,
-        public bool  $jitEnabled,
-        public bool  $parallelExtension,
-        public bool  $fiberSupport,
+        public bool $opcacheEnabled,
+        public bool $jitEnabled,
+        public bool $parallelExtension,
+        public bool $fiberSupport,
     ) {}
 
     public function getOptimalBatchSize(): int

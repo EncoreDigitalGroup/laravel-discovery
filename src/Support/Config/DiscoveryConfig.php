@@ -13,8 +13,10 @@ class DiscoveryConfig
     public string $cachePath;
     public array $vendors = [];
     public array $interfaces = [];
+
     /** @deprecated Will be made private in the next major version */
     public int $concurrencyBatchSize;
+
     private bool $searchVendors = false;
     private bool $searchAllVendors = false;
     private ?SystemResourceProfile $resourceProfile = null;

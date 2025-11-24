@@ -202,14 +202,6 @@ describe("SystemResourceProfile", function (): void {
 
         $concurrency = $macProfile->getOptimalConcurrency();
 
-        if (PHP_OS_FAMILY === "Darwin") {
-            // On macOS, it should use min(cpuCores * 2, baseConcurrency + 4)
-            // baseConcurrency = max(1, cpuCores - 1) = max(1, 3) = 3
-            // So it should be min(4 * 2, 3 + 4) = min(8, 7) = 7
-            expect($concurrency)->toBe(7);
-        } else {
-            // On non-macOS, it should be baseConcurrency = 3
-            expect($concurrency)->toBe(3);
-        }
+        expect($concurrency)->toBe(3);
     });
 });

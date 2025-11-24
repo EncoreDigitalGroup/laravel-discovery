@@ -11,15 +11,15 @@ namespace EncoreDigitalGroup\LaravelDiscovery\Support;
 readonly class SystemResourceProfile
 {
     public function __construct(
-        public int $cpuCores,
+        public int   $cpuCores,
         public float $cpuScore,
-        public int $memoryAvailable,
+        public int   $memoryAvailable,
         public float $memoryScore,
         public float $diskIoScore,
-        public bool $opcacheEnabled,
-        public bool $jitEnabled,
-        public bool $parallelExtension,
-        public bool $fiberSupport,
+        public bool  $opcacheEnabled,
+        public bool  $jitEnabled,
+        public bool  $parallelExtension,
+        public bool  $fiberSupport,
     ) {}
 
     public function getOptimalBatchSize(): int
@@ -45,11 +45,6 @@ readonly class SystemResourceProfile
 
         if ($this->memoryScore < 0.3) {
             return max(1, intval($baseConcurrency / 2));
-        }
-
-        // macOS optimization: Use more aggressive concurrency
-        if (PHP_OS_FAMILY === "Darwin") {
-            return min($this->cpuCores * 2, $baseConcurrency + 4);
         }
 
         return $baseConcurrency;

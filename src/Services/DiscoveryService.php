@@ -14,10 +14,6 @@ use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
 use Fiber;
 
 use function Laravel\Prompts\info;
-
-use Laravel\Prompts\Progress;
-
-use function Laravel\Prompts\progress;
 use function Laravel\Prompts\warning;
 
 use PhpParser\Error;
@@ -167,41 +163,18 @@ class DiscoveryService
     {
         $batchSize = $this->config->concurrencyBatchSize;
         $resourceProfile = $this->config->getResourceProfile();
-
-        if ($this->shouldUseProgressiveProcessing($resourceProfile, $files)) {
-            $this->processFilesProgressively($files, $batchSize, $resourceProfile);
-        } else {
-            progress(
-                label: "Processing files",
-                steps: $files,
-                callback: fn ($file, $progress) => $this->processFileWithProgress($file, $progress, $batchSize, $resourceProfile),
-                hint: "Batch Size: {$batchSize}"
-            );
-        }
+        $this->processFilesProgressively($files, $batchSize, $resourceProfile);
     }
 
-    private function shouldUseProgressiveProcessing(SystemResourceProfile $resourceProfile, array $files): bool
+    private function processFilesProgressively(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
     {
-        return getenv("CI") == "true"
-            || PHP_OS_FAMILY === "Windows"
-            || ($resourceProfile->shouldUseProgressiveScanning() && count($files) > 5000);
-    }
+        $batches = array_chunk($files, max(1, $batchSize));
 
-    private function processFileWithProgress(SplFileInfo $file, Progress $progress, int $batchSize, SystemResourceProfile $resourceProfile): void
-    {
-        static $batch = [];
-        static $totalProcessed = 0;
+        info("Using progressive scanning mode (Batch Size: {$batchSize})");
 
-        $batch[] = $file;
-        $totalProcessed++;
-
-        if (count($batch) >= $batchSize || $totalProcessed === $progress->total) {
+        foreach ($batches as $batch) {
             $this->processBatchConcurrently($batch, $resourceProfile);
-            $batch = [];
-
-            if ($resourceProfile->memoryScore < 0.5 && $totalProcessed % ($batchSize * 2) === 0) {
-                gc_collect_cycles();
-            }
+            gc_collect_cycles();
         }
     }
 
@@ -222,18 +195,6 @@ class DiscoveryService
             foreach ($fibers as $fiber) {
                 $fiber->start();
             }
-        }
-    }
-
-    private function processFilesProgressively(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
-    {
-        $batches = array_chunk($files, max(1, $batchSize));
-
-        info("Using progressive scanning mode (Batch Size: {$batchSize})");
-
-        foreach ($batches as $batch) {
-            $this->processBatchConcurrently($batch, $resourceProfile);
-            gc_collect_cycles();
         }
     }
 

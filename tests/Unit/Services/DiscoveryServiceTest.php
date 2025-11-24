@@ -2,12 +2,16 @@
 
 use EncoreDigitalGroup\LaravelDiscovery\Services\DiscoveryService;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
-use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use Illuminate\Support\Facades\App;
 
 describe("DiscoveryService", function (): void {
     beforeEach(function (): void {
+        // Create unique cache path for this test to avoid parallel conflicts
+        $uniqueId = uniqid('test_', true);
+        $this->testCachePath = sys_get_temp_dir() . "/discovery_test_cache_{$uniqueId}";
+
         $this->config = new DiscoveryConfig;
+        $this->config->cachePath = $this->testCachePath;
         $this->service = new DiscoveryService($this->config);
 
         // Ensure cache directory exists
@@ -17,12 +21,15 @@ describe("DiscoveryService", function (): void {
     });
 
     afterEach(function (): void {
-        // Clean up any cache files
-        if (is_dir($this->config->cachePath)) {
-            $files = glob($this->config->cachePath . "/*.php");
+        // Clean up test cache directory
+        if (isset($this->testCachePath) && is_dir($this->testCachePath)) {
+            $files = glob($this->testCachePath . "/*.php");
             foreach ($files as $file) {
-                unlink($file);
+                if (file_exists($file)) {
+                    unlink($file);
+                }
             }
+            rmdir($this->testCachePath);
         }
     });
 
@@ -78,46 +85,70 @@ describe("DiscoveryService", function (): void {
     });
 
     test("getDirectories includes app_modules when directory exists", function (): void {
-        // Create temporary app_modules directory
-        $appModulesPath = base_path("app_modules");
-        if (!is_dir($appModulesPath)) {
-            mkdir($appModulesPath, 0755, true);
-            $createdDir = true;
-        }
+        // Use file-based locking to prevent race conditions in parallel tests
+        $lockFile = sys_get_temp_dir() . '/discovery_test_app_modules.lock';
+        $lock = fopen($lockFile, 'c+');
+        flock($lock, LOCK_EX);
 
-        $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod("getDirectories");
-        $method->setAccessible(true);
+        try {
+            $appModulesPath = base_path("app_modules");
+            $createdDir = false;
 
-        $directories = $method->invoke($this->service);
+            if (!is_dir($appModulesPath)) {
+                mkdir($appModulesPath, 0755, true);
+                $createdDir = true;
+            }
 
-        expect($directories)->toContain($appModulesPath);
+            $reflection = new ReflectionClass($this->service);
+            $method = $reflection->getMethod("getDirectories");
+            $method->setAccessible(true);
 
-        // Clean up
-        if (isset($createdDir)) {
-            rmdir($appModulesPath);
+            $directories = $method->invoke($this->service);
+
+            expect($directories)->toContain($appModulesPath);
+
+            // Clean up only if we created it
+            if ($createdDir && is_dir($appModulesPath)) {
+                rmdir($appModulesPath);
+            }
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+            @unlink($lockFile);
         }
     });
 
     test("getDirectories includes app-modules when directory exists", function (): void {
-        // Create temporary app-modules directory
-        $appModulesPath = base_path("app-modules");
-        if (!is_dir($appModulesPath)) {
-            mkdir($appModulesPath, 0755, true);
-            $createdDir = true;
-        }
+        // Use file-based locking to prevent race conditions in parallel tests
+        $lockFile = sys_get_temp_dir() . '/discovery_test_app_modules_dash.lock';
+        $lock = fopen($lockFile, 'c+');
+        flock($lock, LOCK_EX);
 
-        $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod("getDirectories");
-        $method->setAccessible(true);
+        try {
+            $appModulesPath = base_path("app-modules");
+            $createdDir = false;
 
-        $directories = $method->invoke($this->service);
+            if (!is_dir($appModulesPath)) {
+                mkdir($appModulesPath, 0755, true);
+                $createdDir = true;
+            }
 
-        expect($directories)->toContain($appModulesPath);
+            $reflection = new ReflectionClass($this->service);
+            $method = $reflection->getMethod("getDirectories");
+            $method->setAccessible(true);
 
-        // Clean up
-        if (isset($createdDir)) {
-            rmdir($appModulesPath);
+            $directories = $method->invoke($this->service);
+
+            expect($directories)->toContain($appModulesPath);
+
+            // Clean up only if we created it
+            if ($createdDir && is_dir($appModulesPath)) {
+                rmdir($appModulesPath);
+            }
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+            @unlink($lockFile);
         }
     });
 
@@ -155,66 +186,6 @@ describe("DiscoveryService", function (): void {
         // Just verify the method works without asserting specific paths
         $result = $method->invokeArgs($this->service, ["/some/test/path.php"]);
         expect(is_bool($result))->toBeTrue();
-    });
-
-    test("shouldUseProgressiveProcessing returns true for Windows", function (): void {
-        // Mock PHP_OS_FAMILY for this test would require additional setup
-        // Instead, test the logic directly
-        $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod("shouldUseProgressiveProcessing");
-        $method->setAccessible(true);
-
-        $resourceProfile = new SystemResourceProfile(
-            cpuCores: 4,
-            cpuScore: 0.8,
-            memoryAvailable: 1024 * 1024 * 1024,
-            memoryScore: 0.8,
-            diskIoScore: 0.6,
-            opcacheEnabled: true,
-            jitEnabled: false,
-            parallelExtension: false,
-            fiberSupport: true
-        );
-
-        $files = array_fill(0, 100, new SplFileInfo(__FILE__));
-
-        $result = $method->invoke($this->service, $resourceProfile, $files);
-
-        // On Windows or with large file count and low memory, should return true
-        if (PHP_OS_FAMILY === "Windows") {
-            expect($result)->toBeTrue();
-        } else {
-            // On non-Windows with good resources and small file count, should be false
-            expect($result)->toBeBool();
-        }
-    });
-
-    test("shouldUseProgressiveProcessing returns true for large file count with low memory", function (): void {
-        $reflection = new ReflectionClass($this->service);
-        $method = $reflection->getMethod("shouldUseProgressiveProcessing");
-        $method->setAccessible(true);
-
-        $lowMemoryProfile = new SystemResourceProfile(
-            cpuCores: 4,
-            cpuScore: 0.8,
-            memoryAvailable: 200 * 1024 * 1024,
-            memoryScore: 0.3, // Low memory score
-            diskIoScore: 0.6,
-            opcacheEnabled: true,
-            jitEnabled: false,
-            parallelExtension: false,
-            fiberSupport: true
-        );
-
-        $manyFiles = array_fill(0, 6000, new SplFileInfo(__FILE__)); // More than 5000 files
-
-        $result = $method->invoke($this->service, $lowMemoryProfile, $manyFiles);
-
-        if (PHP_OS_FAMILY !== "Windows") {
-            expect($result)->toBeTrue();
-        } else {
-            expect($result)->toBeBool();
-        }
     });
 
     test("processFile handles file reading and parsing", function (): void {
@@ -320,9 +291,9 @@ describe("DiscoveryService", function (): void {
 
         $files = $method->invoke($this->service, $tempDir);
 
-        expect(count($files))->toBe(1);
-        expect($files[0])->toBeInstanceOf(SplFileInfo::class);
-        expect($files[0]->getExtension())->toBe("php");
+        expect(count($files))->toBe(1)
+            ->and($files[0])->toBeInstanceOf(SplFileInfo::class)
+            ->and($files[0]->getExtension())->toBe("php");
 
         // Clean up
         unlink($tempDir . "/test.php");

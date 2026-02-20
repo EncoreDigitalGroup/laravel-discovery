@@ -7,11 +7,12 @@ use Illuminate\Support\Facades\App;
 describe("DiscoveryService", function (): void {
     beforeEach(function (): void {
         // Create unique cache path for this test to avoid parallel conflicts
-        $uniqueId = uniqid('test_', true);
+        $uniqueId = uniqid("test_", true);
         $this->testCachePath = sys_get_temp_dir() . "/discovery_test_cache_{$uniqueId}";
 
         $this->config = new DiscoveryConfig;
         $this->config->cachePath = $this->testCachePath;
+
         $this->service = new DiscoveryService($this->config);
 
         // Ensure cache directory exists
@@ -22,7 +23,7 @@ describe("DiscoveryService", function (): void {
 
     afterEach(function (): void {
         // Clean up test cache directory
-        if (isset($this->testCachePath) && is_dir($this->testCachePath)) {
+        if (property_exists($this, 'testCachePath') && $this->testCachePath !== null && is_dir($this->testCachePath)) {
             $files = glob($this->testCachePath . "/*.php");
             foreach ($files as $file) {
                 if (file_exists($file)) {
@@ -86,8 +87,8 @@ describe("DiscoveryService", function (): void {
 
     test("getDirectories includes app_modules when directory exists", function (): void {
         // Use file-based locking to prevent race conditions in parallel tests
-        $lockFile = sys_get_temp_dir() . '/discovery_test_app_modules.lock';
-        $lock = fopen($lockFile, 'c+');
+        $lockFile = sys_get_temp_dir() . "/discovery_test_app_modules.lock";
+        $lock = fopen($lockFile, "c+");
         flock($lock, LOCK_EX);
 
         try {
@@ -120,8 +121,8 @@ describe("DiscoveryService", function (): void {
 
     test("getDirectories includes app-modules when directory exists", function (): void {
         // Use file-based locking to prevent race conditions in parallel tests
-        $lockFile = sys_get_temp_dir() . '/discovery_test_app_modules_dash.lock';
-        $lock = fopen($lockFile, 'c+');
+        $lockFile = sys_get_temp_dir() . "/discovery_test_app_modules_dash.lock";
+        $lock = fopen($lockFile, "c+");
         flock($lock, LOCK_EX);
 
         try {

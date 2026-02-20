@@ -20,9 +20,7 @@ class InterfaceImplementorFinder extends NodeVisitorAbstract
     private string $currentNamespace = "";
     private array $interfaceNames = [];
 
-    /**
-     * @deprecated Use setInterfaceNames() instead for multi-interface discovery
-     */
+    /** @deprecated Use setInterfaceNames() instead for multi-interface discovery */
     public function setInterfaceName(string $interfaceName): void
     {
         $this->interfaceNames = [$interfaceName];

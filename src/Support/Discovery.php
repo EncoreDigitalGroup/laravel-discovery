@@ -14,6 +14,7 @@ use RuntimeException;
 class Discovery
 {
     private static self $instance;
+    private static array $mocks = [];
     private DiscoveryConfig $config;
 
     public function __construct()
@@ -44,10 +45,28 @@ class Discovery
         return Discovery::config()->cachePath . "/{$key}.php";
     }
 
+    public static function mock(string $key, array $implementations): void
+    {
+        if (interface_exists($key)) {
+            $key = class_basename($key);
+        }
+
+        self::$mocks[$key] = $implementations;
+    }
+
+    public static function clearMocks(): void
+    {
+        self::$mocks = [];
+    }
+
     public static function get(string $key): array
     {
         if (interface_exists($key)) {
             $key = class_basename($key);
+        }
+
+        if (!App::environment("production") && isset(self::$mocks[$key])) {
+            return self::$mocks[$key];
         }
 
         return require Discovery::config()->cachePath . "/{$key}.php";
@@ -67,6 +86,7 @@ class Discovery
         }
 
         self::$instance = new self;
+        self::$mocks = [];
 
         return self::make()->config;
     }

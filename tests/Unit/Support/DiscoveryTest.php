@@ -189,4 +189,64 @@ describe("Discovery", function (): void {
             Discovery::refresh();
         })->toThrow(RuntimeException::class, "Discovery::refresh() can only be used in testing environments.");
     });
+
+    test("mock returns registered implementations from get", function (): void {
+        $implementations = ["SomeClass", "AnotherClass"];
+        Discovery::mock("SomeInterface", $implementations);
+
+        $result = Discovery::get("SomeInterface");
+
+        expect($result)->toBe($implementations);
+
+        Discovery::clearMocks();
+    });
+
+    test("mock normalizes interface name via class_basename", function (): void {
+        interface MockableInterface {}
+
+        $implementations = ["ConcreteImpl"];
+        Discovery::mock(MockableInterface::class, $implementations);
+
+        $result = Discovery::get(MockableInterface::class);
+
+        expect($result)->toBe($implementations);
+
+        Discovery::clearMocks();
+    });
+
+    test("clearMocks removes all registered mocks", function (): void {
+        Discovery::mock("SomeInterface", ["SomeClass"]);
+        Discovery::clearMocks();
+
+        expect(function (): void {
+            Discovery::get("SomeInterface");
+        })->toThrow(ErrorException::class);
+    });
+
+    test("refresh clears registered mocks", function (): void {
+        Discovery::mock("SomeInterface", ["SomeClass"]);
+        Discovery::refresh();
+
+        expect(function (): void {
+            Discovery::get("SomeInterface");
+        })->toThrow(ErrorException::class);
+    });
+
+    test("get falls through to cache file when no mock registered", function (): void {
+        $testData = ["CachedClass"];
+        $cachePath = Discovery::config()->cachePath;
+        $cacheFile = $cachePath . "/UnmockedInterface.php";
+
+        if (!is_dir($cachePath)) {
+            mkdir($cachePath, 0755, true);
+        }
+
+        file_put_contents($cacheFile, "<?php\n\nreturn " . var_export($testData, true) . ";\n");
+
+        $result = Discovery::get("UnmockedInterface");
+
+        expect($result)->toEqual($testData);
+
+        unlink($cacheFile);
+    });
 });

@@ -23,7 +23,7 @@ describe("DiscoveryService", function (): void {
 
     afterEach(function (): void {
         // Clean up test cache directory
-        if (property_exists($this, 'testCachePath') && $this->testCachePath !== null && is_dir($this->testCachePath)) {
+        if (property_exists($this, "testCachePath") && $this->testCachePath !== null && is_dir($this->testCachePath)) {
             $files = glob($this->testCachePath . "/*.php");
             foreach ($files as $file) {
                 if (file_exists($file)) {

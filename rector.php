@@ -7,12 +7,10 @@
 
 declare(strict_types=1);
 
-use PHPGenesis\DevUtilities\Rector\Rector;
-use Rector\Config\RectorConfig;
+use EncoreDigitalGroup\DevTools\Rector\Rector;
 
-return RectorConfig::configure()
+return Rector::configure()
     ->withPaths([
         __DIR__ . "/src",
         __DIR__ . "/tests",
-    ])
-    ->withRules(Rector::rules());
+    ]);

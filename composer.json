@@ -1,7 +1,7 @@
 {
     "name": "encoredigitalgroup/laravel-discovery",
     "type": "library",
-    "license": "BSD-3-Clause",
+    "license": "proprietary",
     "authors": [
         {
             "name": "Marc Beinder",
@@ -12,6 +12,7 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
+            "encoredigitalgroup/devtools": true,
             "neronmoon/scriptsdev": true,
             "pestphp/pest-plugin": true,
             "php-http/discovery": true,
@@ -25,10 +26,10 @@
         "illuminate/console": "^11|^12|^13",
         "illuminate/support": "^11|^12|^13",
         "laravel/prompts": "^0.3.7",
-        "nikic/php-parser": "^5.4",
-        "phpgenesis/logger": "^1.0"
+        "nikic/php-parser": "^5.4"
     },
     "require-dev": {
+        "encoredigitalgroup/devtools": "^0.1.1",
         "friendsofphp/php-cs-fixer": "^3.9",
         "larastan/larastan": "^3",
         "neronmoon/scriptsdev": "^0.1.9",
@@ -36,7 +37,6 @@
         "pestphp/pest": "^3.8",
         "pestphp/pest-plugin-drift": "^3.0",
         "pestphp/pest-plugin-laravel": "^3.2",
-        "phpgenesis/devutilities": "^1.0",
         "phpstan/extension-installer": "^1.3",
         "phpstan/phpstan": "^2",
         "rector/rector": "^2",
@@ -53,7 +53,9 @@
             "Tests\\": "tests/"
         }
     },
-    "scripts": {},
+    "scripts": {
+        "test": "vendor/bin/pest --parallel"
+    },
     "extra": {
         "laravel": {
             "providers": [

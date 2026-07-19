@@ -1,0 +1,69 @@
+# GitLab CI Pipeline — laravel-discovery
+#
+# Required CI/CD Variables (Settings > CI/CD > Variables):
+#   COMPOSER_AUTH  — masked; JSON authentication for private Composer packages, if any are required.
+#
+# Required project setting:
+#   Settings > Repository > "Allow CI job token to push to this project" must be
+#   enabled for the code_style job to push style-fix commits back to the MR branch.
+#
+# Pipeline overview:
+#   code_style (MR only) → static_analysis + test (MR + main push) → release (semver + rc tags)
+
+workflow:
+    auto_cancel:
+        on_new_commit: interruptible
+
+include:
+    -   project: internal/ci-pipelines
+        ref: main
+        file:
+            - /workflows/php/code-style.yml
+            - /workflows/php/static-analysis.yml
+            - /workflows/php/test.yml
+            - /workflows/gitlab/create-release.yml
+
+stages:
+    - quality
+    - release
+
+code_style:
+    stage: quality
+    extends: .php:code-style
+    interruptible: true
+    image:
+        name: "$PHP_CI_IMAGE"
+        pull_policy: always
+    rules:
+        -   if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+static_analysis:
+    stage: quality
+    extends: .php:static-analysis
+    interruptible: true
+    variables:
+        PHPSTAN_PATHS: "src/"
+    image:
+        name: "$PHP_CI_IMAGE"
+        pull_policy: always
+    rules:
+        -   if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        -   if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+
+test:
+    stage: quality
+    extends: .php:test
+    interruptible: true
+    image:
+        name: "$PHP_CI_IMAGE"
+        pull_policy: always
+    rules:
+        -   if: $CI_PIPELINE_SOURCE == "merge_request_event"
+        -   if: $CI_COMMIT_BRANCH == "main" && $CI_PIPELINE_SOURCE == "push"
+
+release:
+    stage: release
+    extends: .gitlab:create-release
+    interruptible: false
+    rules:
+        -   if: $CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+(-rc\d+)?$/

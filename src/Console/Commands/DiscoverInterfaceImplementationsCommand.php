@@ -20,13 +20,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
     protected $signature = "discovery:run";
     protected $description = "Generate a list of classes implementing interfaces";
 
-    public function __construct(
-        private readonly DiscoveryService $discoveryService
-    ) {
-        parent::__construct();
-    }
-
-    public function handle(): int
+    public function handle(DiscoveryService $discovery): int
     {
         $startedAt = Date::now();
         $this->newLine();
@@ -50,7 +44,7 @@ class DiscoverInterfaceImplementationsCommand extends Command
 
         $this->info("Discovering " . Number::format(count($interfaces)) . " interface(s).");
 
-        $this->discoveryService->discoverAll($interfaces);
+        $discovery->discoverAll($this, $interfaces);
 
         $duration = $startedAt->diff(Date::now());
         $this->info("Discovery completed in " . $duration->forHumans());

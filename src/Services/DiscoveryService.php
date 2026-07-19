@@ -7,15 +7,10 @@
 
 namespace EncoreDigitalGroup\LaravelDiscovery\Services;
 
+use EncoreDigitalGroup\LaravelDiscovery\Console\Commands\DiscoverInterfaceImplementationsCommand;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\InterfaceImplementorFinder;
-use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
 use EncoreDigitalGroup\StdLib\Objects\Support\Types\Number;
-use Fiber;
-
-use function Laravel\Prompts\info;
-use function Laravel\Prompts\warning;
-
 use PhpParser\Error;
 use PhpParser\NodeTraverser;
 use PhpParser\Parser;
@@ -60,14 +55,13 @@ class DiscoveryService
     private Parser $parser;
     private NodeTraverser $traverser;
 
-    public function __construct(
-        private readonly DiscoveryConfig $config
-    ) {
+    public function __construct(private readonly DiscoveryConfig $config)
+    {
         $this->parser = (new ParserFactory)->createForVersion(PhpVersion::getHostVersion());
         $this->traverser = new NodeTraverser;
     }
 
-    public function discoverAll(array $interfaces): void
+    public function discoverAll(DiscoverInterfaceImplementationsCommand $cmd, array $interfaces): void
     {
         $finder = new InterfaceImplementorFinder;
         $finder->setInterfaceNames($interfaces);
@@ -78,12 +72,12 @@ class DiscoveryService
         $totalFiles = count($allFiles);
 
         if ($totalFiles === 0) {
-            warning("No PHP files found to scan.");
+            $cmd->warn("No PHP files found to scan.");
 
             return;
         }
 
-        info("Scanning " . Number::format($totalFiles) . " files...");
+        $cmd->info("Scanning " . Number::format($totalFiles) . " files...");
         $this->processFiles($allFiles);
         $this->writeCacheFiles($interfaces, $finder);
     }
@@ -161,39 +155,16 @@ class DiscoveryService
 
     private function processFiles(array $files): void
     {
-        $batchSize = $this->config->concurrencyBatchSize;
-        $resourceProfile = $this->config->getResourceProfile();
-        $this->processFilesProgressively($files, $batchSize, $resourceProfile);
-    }
+        $count = 0;
 
-    private function processFilesProgressively(array $files, int $batchSize, SystemResourceProfile $resourceProfile): void
-    {
-        $batches = array_chunk($files, max(1, $batchSize));
+        foreach ($files as $file) {
+            $this->processFile($file);
 
-        info("Using progressive scanning mode (Batch Size: {$batchSize})");
-
-        foreach ($batches as $batch) {
-            $this->processBatchConcurrently($batch, $resourceProfile);
-            gc_collect_cycles();
-        }
-    }
-
-    private function processBatchConcurrently(array $files, SystemResourceProfile $resourceProfile): void
-    {
-        $optimalConcurrency = $resourceProfile->getOptimalConcurrency();
-        $chunks = array_chunk($files, max(1, intval(count($files) / $optimalConcurrency)));
-
-        foreach ($chunks as $chunk) {
-            $fibers = [];
-
-            foreach ($chunk as $file) {
-                $fibers[] = new Fiber(function () use ($file): void {
-                    $this->processFile($file);
-                });
-            }
-
-            foreach ($fibers as $fiber) {
-                $fiber->start();
+            // Periodic cycle collection, decoupled from any batch boundary.
+            // Keeps the GC root buffer trimmed without stalling on one large
+            // sweep after a fixed number of files.
+            if ((++$count % 500) === 0) {
+                gc_collect_cycles();
             }
         }
     }
@@ -213,6 +184,7 @@ class DiscoveryService
             }
 
             $this->traverser->traverse($ast);
+            unset($ast);
         } catch (Error) {
             // Skip files with parsing errors
         }

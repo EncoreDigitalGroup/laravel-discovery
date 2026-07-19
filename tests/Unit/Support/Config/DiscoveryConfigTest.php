@@ -1,6 +1,9 @@
 <?php
 
+use EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
 use EncoreDigitalGroup\LaravelDiscovery\Support\Discovery;
+use EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile;
+use EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException;
 use Tests\TestHelpers\AnotherTestInterface;
 use Tests\TestHelpers\TestInterface;
 
@@ -129,41 +132,9 @@ describe("DiscoveryConfig", function (): void {
         expect(Discovery::config()->interfaces)->not->toContain("", "FakeInterface");
     });
 
-    test("constructor sets default concurrency batch size based on system resources", function (): void {
-        $batchSize = Discovery::refresh()->concurrencyBatchSize;
-        expect($batchSize)->toBeGreaterThanOrEqual(100)
-            ->and($batchSize)->toBeLessThanOrEqual(2000)
-            ->and(in_array($batchSize, [100, 500, 1000, 2000]))->toBeTrue();
-    });
-
-    test("setConcurrencyBatchSize updates batch size", function (): void {
-        $result = Discovery::refresh()->setConcurrencyBatchSize(100);
-
-        expect($result)->toBe(Discovery::config())
-            ->and(Discovery::config()->concurrencyBatchSize)->toBe(100);
-    });
-
-    test("setConcurrencyBatchSize enforces minimum value of 1", function (): void {
-        Discovery::refresh()->setConcurrencyBatchSize(0);
-        expect(Discovery::config()->concurrencyBatchSize)->toBe(1);
-
-        Discovery::refresh()->setConcurrencyBatchSize(-10);
-        expect(Discovery::config()->concurrencyBatchSize)->toBe(1);
-    });
-
-    test("setConcurrencyBatchSize supports method chaining", function (): void {
-        $result = Discovery::refresh()
-            ->setConcurrencyBatchSize(25)
-            ->addInterface(TestInterface::class);
-
-        expect($result)->toBe(Discovery::config())
-            ->and(Discovery::config()->concurrencyBatchSize)->toBe(25)
-            ->and(Discovery::config()->interfaces)->toContain("TestInterface");
-    });
-
     test("addVendor throws exception for non-existent vendor in non-testing environment", function (): void {
         // Create a new DiscoveryConfig directly instead of using Discovery singleton
-        $config = new \EncoreDigitalGroup\LaravelDiscovery\Support\Config\DiscoveryConfig;
+        $config = new DiscoveryConfig;
 
         // Mock App::environment to return false for testing
         App::shouldReceive("environment")
@@ -173,7 +144,7 @@ describe("DiscoveryConfig", function (): void {
 
         expect(function () use ($config): void {
             $config->addVendor("nonexistent-vendor");
-        })->toThrow(\EncoreDigitalGroup\StdLib\Exceptions\FilesystemExceptions\DirectoryNotFoundException::class);
+        })->toThrow(DirectoryNotFoundException::class);
     });
 
     test("getResourceProfile creates new resource profile when not set", function (): void {
@@ -187,6 +158,6 @@ describe("DiscoveryConfig", function (): void {
 
         $profile = $config->getResourceProfile();
 
-        expect($profile)->toBeInstanceOf(\EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile::class);
+        expect($profile)->toBeInstanceOf(SystemResourceProfile::class);
     });
 });

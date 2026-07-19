@@ -13,10 +13,6 @@ class DiscoveryConfig
     public string $cachePath;
     public array $vendors = [];
     public array $interfaces = [];
-
-    /** @deprecated Will be made private in the next major version */
-    public int $concurrencyBatchSize;
-
     private bool $searchVendors = false;
     private bool $searchAllVendors = false;
     private ?SystemResourceProfile $resourceProfile = null;
@@ -25,7 +21,6 @@ class DiscoveryConfig
     {
         $this->cachePath = base_path("bootstrap/cache/discovery");
         $this->resourceProfile = SystemResourceDetector::make();
-        $this->concurrencyBatchSize = $this->resourceProfile->getOptimalBatchSize();
     }
 
     public function addVendor(string $vendor): self
@@ -83,16 +78,10 @@ class DiscoveryConfig
         return $this;
     }
 
-    public function setConcurrencyBatchSize(int $size): self
-    {
-        $this->concurrencyBatchSize = max(1, $size);
-
-        return $this;
-    }
-
+    /** @deprecated No replacement. */
     public function getResourceProfile(): SystemResourceProfile
     {
-        if (!$this->resourceProfile instanceof \EncoreDigitalGroup\LaravelDiscovery\Support\SystemResourceProfile) {
+        if (!$this->resourceProfile instanceof SystemResourceProfile) {
             $this->resourceProfile = SystemResourceDetector::make();
         }
 
